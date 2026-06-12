@@ -41,7 +41,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<!-- Firebase Email Link deep link: custom URL scheme. -->
+	<!-- URL schemes: ahara:// for Firebase email links, nutriplan:// for app deep links. -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -54,11 +54,22 @@
 				<string>ahara</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app.nutriplan</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nutriplan</string>
+			</array>
+		</dict>
 	</array>
-	<!-- Allow Firebase Dynamic Links domain for universal links. -->
+	<!-- Universal links: Firebase Dynamic Links + nutriplan.app. -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:ahara.page.link</string>
+		<string>applinks:nutriplan.app</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
