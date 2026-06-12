@@ -1,0 +1,5 @@
+#include "Debug.xcconfig"
+
+APP_DISPLAY_NAME=Ahara
+PRODUCT_BUNDLE_IDENTIFIER=com.ahara.ahara
+DART_DEFINES=FLAVOR=prod
