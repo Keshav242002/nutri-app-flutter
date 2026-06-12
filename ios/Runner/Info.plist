@@ -41,6 +41,25 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Firebase Email Link deep link: custom URL scheme. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>ahara.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ahara</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Allow Firebase Dynamic Links domain for universal links. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:ahara.page.link</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

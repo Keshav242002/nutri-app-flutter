@@ -9,11 +9,7 @@ void main() {
   setUpAll(Env.initialize);
 
   testWidgets('AharaApp mounts without error', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: AharaApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: AharaApp()));
     await tester.pumpAndSettle();
     expect(find.byType(MaterialApp), findsOneWidget);
   });

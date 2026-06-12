@@ -1,28 +1,29 @@
 /// Centralized route path constants for the Ahara app.
 ///
 /// All route strings are defined here — never use raw string literals
-/// in navigation calls. New routes added per module.
+/// in navigation calls.
 abstract final class RoutePaths {
-  /// Placeholder home screen (F0).
+  /// Brand entrance / auth-gate screen.
+  static const splash = '/splash';
+
+  /// Value-prop onboarding slides (first-time users).
+  static const onboardingIntro = '/onboarding-intro';
+
+  /// Combined login + signup screen.
+  static const login = '/login';
+
+  /// F2 dietary-profile questionnaire (new users post-auth).
+  static const onboarding = '/onboarding';
+
+  /// Main home / dashboard screen.
   static const home = '/home';
 
-  // --- Routes below will be added in future modules ---
+  /// Recipe browser (stubbed in v1, promoted in v1.1).
+  static const recipes = '/recipes';
 
-  // TODO(F1): splash, login, signup
-  // static const splash = '/splash';
-  // static const login = '/login';
-  // static const signup = '/signup';
+  /// Daily food tracker screen.
+  static const tracker = '/tracker';
 
-  // TODO(F2): onboarding
-  // static const onboarding = '/onboarding';
-
-  // TODO(F3): recipe detail, recipes browse
-  // static const recipeDetail = '/recipe/:slug';
-  // static const recipes = '/recipes';
-
-  // TODO(F4): tracker
-  // static const tracker = '/tracker';
-
-  // TODO(F5): profile, weekly
-  // static const profile = '/profile';
+  /// User profile screen.
+  static const profile = '/profile';
 }

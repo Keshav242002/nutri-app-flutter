@@ -1,0 +1,356 @@
+import 'package:ahara/core/routing/route_paths.dart';
+import 'package:ahara/core/theme/app_colors.dart';
+import 'package:ahara/core/theme/app_radius.dart';
+import 'package:ahara/core/theme/app_shadows.dart';
+import 'package:ahara/core/theme/app_spacing.dart';
+import 'package:ahara/core/theme/app_typography.dart';
+import 'package:ahara/core/widgets/app_button.dart';
+import 'package:ahara/core/widgets/app_text_field.dart';
+import 'package:ahara/core/widgets/loading_state.dart';
+import 'package:ahara/features/auth/domain/models/login_form_state.dart';
+import 'package:ahara/features/auth/domain/models/user_model.dart';
+import 'package:ahara/features/auth/presentation/controllers/login_controller.dart';
+import 'package:ahara/features/auth/presentation/widgets/email_link_sent_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+/// Combined login + signup screen.
+///
+/// Three states live inside the bottom sheet:
+/// A — choose method (Google / Email)
+/// B — email entry + send link
+/// C — email link sent / "check your email"
+class LoginScreen extends ConsumerStatefulWidget {
+  /// Creates the [LoginScreen].
+  const LoginScreen({super.key});
+
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onStateChanged(LoginFormState? _, LoginFormState next) {
+    next.maybeWhen(
+      success: (User __) => context.go(RoutePaths.home),
+      orElse: () {},
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final formState = ref.watch<LoginFormState>(loginControllerProvider);
+    ref.listen<LoginFormState>(loginControllerProvider, _onStateChanged);
+
+    final size = MediaQuery.sizeOf(context);
+
+    return Scaffold(
+      backgroundColor: AppColors.navyDeep,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          // Image panel — Navy placeholder (login_bg.png missing).
+          const SizedBox.expand(child: ColoredBox(color: AppColors.navyDeep)),
+
+          // Bottom content sheet — bottom 50%.
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: size.height * 0.5 + 16,
+                maxHeight: size.height * 0.85,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.cream,
+                borderRadius: AppRadius.bottomSheet,
+              ),
+              padding: EdgeInsets.only(
+                top: 28,
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+              ),
+              child: SingleChildScrollView(
+                child: _buildSheetContent(formState),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSheetContent(LoginFormState state) {
+    return state.when(
+      chooseMethod: _buildChooseMethod,
+      emailEntry: _buildEmailEntry,
+      emailLinkSending: (String email) =>
+          _buildEmailEntry(email, true, null, loading: true),
+      emailLinkSent: _buildEmailLinkSent,
+      emailLinkVerifying: (String _) =>
+          const LoadingState(message: 'Signing you in…'),
+      googleSigningIn: _buildGoogleLoading,
+      success: _buildSuccessLoading,
+      error: _buildErrorState,
+    );
+  }
+
+  // --- State A: choose method ---
+
+  Widget _buildChooseMethod() {
+    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: Image.asset(
+            'assets/logo_mark_ligh.png',
+            width: 36,
+            height: 36,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Welcome to Ahara',
+          style: AppTypography.displayMedium.copyWith(
+            color: AppColors.navyDeep,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Sign in or create your account',
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 28),
+        _GoogleButton(onPressed: ctrl.signInWithGoogle),
+        const SizedBox(height: 12),
+        _EmailMethodButton(onPressed: ctrl.selectEmail),
+        const SizedBox(height: AppSpacing.md),
+        const _TermsText(),
+      ],
+    );
+  }
+
+  Widget _buildErrorState(String msg) {
+    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Center(
+          child: Image.asset(
+            'assets/logo_mark_ligh.png',
+            width: 36,
+            height: 36,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Welcome to Ahara',
+          style: AppTypography.displayMedium.copyWith(
+            color: AppColors.navyDeep,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Sign in or create your account',
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 28),
+        _GoogleButton(onPressed: ctrl.signInWithGoogle),
+        const SizedBox(height: 12),
+        _EmailMethodButton(onPressed: ctrl.selectEmail),
+        const SizedBox(height: 12),
+        Text(
+          msg,
+          style: AppTypography.caption.copyWith(color: AppColors.error),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        const _TermsText(),
+      ],
+    );
+  }
+
+  static Widget _buildGoogleLoading() =>
+      const LoadingState(message: 'Signing in with Google…');
+
+  static Widget _buildSuccessLoading(User _) =>
+      const LoadingState(message: 'Welcome!');
+
+  // --- State B: email entry ---
+
+  Widget _buildEmailEntry(
+    String email,
+    bool isValid,
+    String? errorMessage, {
+    bool loading = false,
+  }) {
+    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
+    if (_emailCtrl.text != email) _emailCtrl.text = email;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            icon: const Icon(Icons.chevron_left_rounded),
+            color: AppColors.navyDeep.withValues(alpha: 0.5),
+            onPressed: ctrl.goBack,
+            padding: EdgeInsets.zero,
+          ),
+        ),
+        Text(
+          'Enter your email',
+          style: AppTypography.displayMedium.copyWith(
+            color: AppColors.navyDeep,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          "We'll send you a sign-in link",
+          style: AppTypography.labelMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 20),
+        AppTextField(
+          controller: _emailCtrl,
+          placeholder: 'yourname@email.com',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.done,
+          autofocus: true,
+          onChanged: ctrl.updateEmail,
+          errorText: errorMessage,
+          onSubmitted: isValid
+              ? (_) => ctrl.sendEmailLink(_emailCtrl.text)
+              : null,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppButton(
+          label: 'Send sign-in link',
+          onPressed: isValid ? () => ctrl.sendEmailLink(_emailCtrl.text) : null,
+          isLoading: loading,
+        ),
+      ],
+    );
+  }
+
+  // --- State C: email link sent ---
+
+  Widget _buildEmailLinkSent(String email, int countdown) {
+    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
+    return EmailLinkSentView(
+      email: email,
+      resendCountdown: countdown,
+      onResend: () => ctrl.resendEmailLink(email),
+    );
+  }
+}
+
+class _GoogleButton extends StatelessWidget {
+  const _GoogleButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: AppRadius.button,
+        border: Border.all(color: AppColors.navyDeep, width: 1.5),
+        boxShadow: AppShadows.button,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: AppRadius.button,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: AppRadius.button,
+          child: const Row(
+            children: [
+              SizedBox(width: 20),
+              Icon(Icons.g_mobiledata_rounded, size: 24),
+              Expanded(child: Center(child: Text('Continue with Google'))),
+              SizedBox(width: 44),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmailMethodButton extends StatelessWidget {
+  const _EmailMethodButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: AppColors.creamDeep,
+          foregroundColor: AppColors.navyDeep,
+          side: const BorderSide(color: AppColors.navyDeep),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
+          textStyle: AppTypography.labelMedium,
+        ),
+        icon: const Icon(Icons.mail_outline_rounded, size: 20),
+        label: const Text('Continue with email / OTP'),
+      ),
+    );
+  }
+}
+
+class _TermsText extends StatelessWidget {
+  const _TermsText();
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: AppTypography.caption.copyWith(color: AppColors.textHint),
+        children: [
+          const TextSpan(text: "By continuing, you agree to Ahara's\n"),
+          TextSpan(
+            text: 'Terms of Service',
+            style: AppTypography.caption.copyWith(color: AppColors.turmeric),
+          ),
+          const TextSpan(text: ' and '),
+          TextSpan(
+            text: 'Privacy Policy',
+            style: AppTypography.caption.copyWith(color: AppColors.turmeric),
+          ),
+        ],
+      ),
+    );
+  }
+}

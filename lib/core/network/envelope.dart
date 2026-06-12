@@ -69,10 +69,7 @@ class EnvelopeParser {
     if (status == 'success') {
       final data = json['data'];
       if (data is List) {
-        return data
-            .cast<Map<String, dynamic>>()
-            .map(fromJson)
-            .toList();
+        return data.cast<Map<String, dynamic>>().map(fromJson).toList();
       }
       throw const ServerException(
         message: 'Unexpected response format: data is not a list.',
@@ -101,18 +98,14 @@ class EnvelopeParser {
     return switch (code) {
       'NOT_AUTHENTICATED' => const UnauthorizedException(),
       'VALIDATION_ERROR' => ValidationException(
-          message: message,
-          fieldErrors: _parseFieldErrors(errorObj?['details']),
-        ),
-      'PROFILE_NOT_FOUND' || 'MEAL_PLAN_NOT_FOUND' => NotFoundException(
-          message: message,
-        ),
-      'REGENERATE_LIMIT' || 'RATE_LIMITED' => RateLimitException(
-          message: message,
-        ),
-      'INTERNAL_ERROR' || 'OPENAI_FAILURE' => ServerException(
-          message: message,
-        ),
+        message: message,
+        fieldErrors: _parseFieldErrors(errorObj?['details']),
+      ),
+      'PROFILE_NOT_FOUND' ||
+      'MEAL_PLAN_NOT_FOUND' => NotFoundException(message: message),
+      'REGENERATE_LIMIT' ||
+      'RATE_LIMITED' => RateLimitException(message: message),
+      'INTERNAL_ERROR' || 'OPENAI_FAILURE' => ServerException(message: message),
       _ => UnknownException(message: message),
     };
   }
@@ -124,9 +117,7 @@ class EnvelopeParser {
     return details.map(
       (key, value) => MapEntry(
         key,
-        value is List
-            ? value.cast<String>()
-            : <String>[value.toString()],
+        value is List ? value.cast<String>() : <String>[value.toString()],
       ),
     );
   }

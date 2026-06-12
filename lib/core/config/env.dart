@@ -7,10 +7,7 @@ import 'package:ahara/core/config/flavors.dart';
 /// Reads `FLAVOR` and `API_BASE_URL` from compile-time defines.
 /// Falls back to sensible dev defaults when defines are absent.
 class Env {
-  const Env._({
-    required this.flavor,
-    required this.apiBaseUrl,
-  });
+  const Env._({required this.flavor, required this.apiBaseUrl});
 
   /// The active build flavor.
   final Flavor flavor;
@@ -28,9 +25,7 @@ class Env {
     const flavorValue = String.fromEnvironment('FLAVOR');
     const apiBaseUrlValue = String.fromEnvironment('API_BASE_URL');
 
-    final flavor = Flavor.fromString(
-      flavorValue.isEmpty ? null : flavorValue,
-    );
+    final flavor = Flavor.fromString(flavorValue.isEmpty ? null : flavorValue);
 
     final apiBaseUrl = apiBaseUrlValue.isNotEmpty
         ? apiBaseUrlValue

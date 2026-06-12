@@ -73,16 +73,15 @@ void main() {
       });
 
       test('custom message overrides default', () {
-        const e = ValidationException(
-          fieldErrors: {},
-          message: 'Custom error',
-        );
+        const e = ValidationException(fieldErrors: {}, message: 'Custom error');
         expect(e.message, 'Custom error');
       });
 
       test('toString includes fieldErrors', () {
         const e = ValidationException(
-          fieldErrors: {'name': ['Required.']},
+          fieldErrors: {
+            'name': ['Required.'],
+          },
         );
         expect(e.toString(), contains('fieldErrors'));
       });

@@ -1,11 +1,29 @@
 /// App spacing tokens for the Ahara design system.
 ///
-/// No inline spacing values — always pull from here.
-// TODO(F1): Populate with values from docs/designs/F1/ once design is locked.
+/// Base unit is 4px. All spacing is a multiple of this unit.
+/// No inline spacing values anywhere else in the codebase.
 abstract final class AppSpacing {
-  // TODO(F1): base unit (likely 4pt grid)
-  // TODO(F1): xs, sm, md, lg, xl, xxl
+  /// 4px — tight internal gaps (icon to label).
+  static const double xs = 4;
 
-  // --- Radius scale ---
-  // TODO(F1): radius_sm, radius_md, radius_lg, radius_pill
+  /// 8px — related element gaps.
+  static const double sm = 8;
+
+  /// 16px — standard component padding.
+  static const double md = 16;
+
+  /// 24px — section spacing.
+  static const double lg = 24;
+
+  /// 32px — large section separation.
+  static const double xl = 32;
+
+  /// 48px — screen-level breathing room.
+  static const double xxl = 48;
+
+  /// 20px — applied to all screen horizontal edges.
+  static const double screenHorizontal = 20;
+
+  /// 24px — top and bottom of screen sections.
+  static const double screenVertical = 24;
 }

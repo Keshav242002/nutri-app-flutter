@@ -1,107 +1,191 @@
 import 'package:ahara/core/routing/route_paths.dart';
+import 'package:ahara/core/widgets/app_bottom_nav.dart';
+import 'package:ahara/features/auth/domain/models/auth_state.dart';
+import 'package:ahara/features/auth/domain/models/user_model.dart';
+import 'package:ahara/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ahara/features/auth/presentation/screens/login_screen.dart';
+import 'package:ahara/features/auth/presentation/screens/onboarding_slides_screen.dart';
+import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
 
-/// Provides the [GoRouter] instance for the app.
-///
-/// F0: Single placeholder route at [RoutePaths.home].
-// TODO(F1): Add splash, login, signup routes + redirect guards.
-// TODO(F1): Wrap tab routes in ShellRoute with AppBottomNav.
-@Riverpod(keepAlive: true)
-GoRouter router(Ref ref) {
-  return GoRouter(
-    initialLocation: RoutePaths.home,
-    debugLogDiagnostics: true,
-    redirect: _redirectGuard,
-    routes: [
-      GoRoute(
-        path: RoutePaths.home,
-        name: 'home',
-        builder: (context, state) => const PlaceholderHomePage(),
-      ),
-    ],
-    errorBuilder: (context, state) => const PlaceholderErrorPage(),
-  );
+// ---------------------------------------------------------------------------
+// Placeholder screens — replaced in later features.
+// ---------------------------------------------------------------------------
+
+class _PlaceholderScreen extends StatelessWidget {
+  const _PlaceholderScreen({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Text(label)));
+  }
 }
 
-/// Redirect guard stub.
-// TODO(F1): Implement auth + profile gate:
-// - Not logged in → /login
-// - Logged in but no profile (PROFILE_NOT_FOUND) → /onboarding
-// - Logged in + onboarded → matched route (default /home)
-String? _redirectGuard(BuildContext context, GoRouterState state) {
-  // TODO(F1): Implement redirect logic.
-  return null;
-}
+/// Shell wrapping the bottom-nav tabs.
+class _ShellScreen extends StatelessWidget {
+  const _ShellScreen({required this.navigationShell});
 
-/// Placeholder home page for F0.
-///
-/// Replaced with the real Dashboard in F3.
-class PlaceholderHomePage extends StatelessWidget {
-  /// Creates the placeholder home page.
-  const PlaceholderHomePage({super.key});
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ahara'),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.restaurant_menu,
-              size: 64,
-              color: Colors.orange,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Ahara',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Your weekly Indian meal plan',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'F0 — Foundation scaffold running ✓',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.green,
-              ),
-            ),
-          ],
+      body: navigationShell,
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: navigationShell.currentIndex,
+        onTap: (int index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
         ),
       ),
     );
   }
 }
 
-/// Placeholder error page for unknown routes.
-class PlaceholderErrorPage extends StatelessWidget {
-  /// Creates the placeholder error page.
-  const PlaceholderErrorPage({super.key});
+// ---------------------------------------------------------------------------
+// Error page — kept for unknown routes.
+// ---------------------------------------------------------------------------
+
+/// Shown when GoRouter encounters an unknown route.
+class RouterErrorPage extends StatelessWidget {
+  /// Creates the [RouterErrorPage].
+  const RouterErrorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Page Not Found')),
-      body: const Center(
-        child: Text('404 — Route not found'),
-      ),
+      body: const Center(child: Text('404 — Route not found')),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Router provider
+// ---------------------------------------------------------------------------
+
+/// Provides the [GoRouter] instance used by the app.
+@Riverpod(keepAlive: true)
+GoRouter appRouter(Ref ref) {
+  final authState = ref.watch<AsyncValue<AuthState>>(authControllerProvider);
+
+  return GoRouter(
+    initialLocation: RoutePaths.splash,
+    debugLogDiagnostics: true,
+    redirect: (BuildContext context, GoRouterState state) =>
+        _redirect(authState, state),
+    errorBuilder: (_, __) => const RouterErrorPage(),
+    routes: [
+      GoRoute(
+        path: RoutePaths.splash,
+        builder: (_, __) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.onboardingIntro,
+        builder: (_, __) => const OnboardingSlidesScreen(),
+      ),
+      GoRoute(path: RoutePaths.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        path: RoutePaths.onboarding,
+        builder: (_, __) =>
+            const _PlaceholderScreen(label: 'Onboarding questionnaire'),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, shell) => _ShellScreen(navigationShell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.home,
+                builder: (_, __) => const _PlaceholderScreen(label: 'Home'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.recipes,
+                builder: (_, __) => const _PlaceholderScreen(label: 'Recipes'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.tracker,
+                builder: (_, __) => const _PlaceholderScreen(label: 'Tracker'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.profile,
+                builder: (_, __) => const _PlaceholderScreen(label: 'Profile'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Redirect logic
+// ---------------------------------------------------------------------------
+
+/// Returns a redirect path or `null` to allow navigation.
+///
+/// Rules:
+/// 1. Auth loading → stay on splash; block all other routes.
+/// 2. Unauthenticated → allow splash / onboarding-intro / login only.
+/// 3. Authenticated without profile → redirect to onboarding questionnaire.
+/// 4. Authenticated with profile → redirect away from auth routes to home.
+String? _redirect(AsyncValue<AuthState> authState, GoRouterState state) {
+  final location = state.uri.path;
+
+  if (authState.isLoading || authState.value == null) {
+    if (location == RoutePaths.splash) return null;
+    return RoutePaths.splash;
+  }
+
+  return authState.value!.when(
+    unauthenticated: () => _redirectUnauthenticated(location),
+    authenticated: (User user) => _redirectAuthenticated(user, location),
+    loading: () {
+      if (location == RoutePaths.splash) return null;
+      return RoutePaths.splash;
+    },
+  );
+}
+
+String? _redirectUnauthenticated(String location) {
+  const publicPaths = {
+    RoutePaths.splash,
+    RoutePaths.onboardingIntro,
+    RoutePaths.login,
+  };
+  if (publicPaths.contains(location)) return null;
+  return RoutePaths.login;
+}
+
+String? _redirectAuthenticated(User user, String location) {
+  const authOnlyPaths = {
+    RoutePaths.login,
+    RoutePaths.onboardingIntro,
+    RoutePaths.splash,
+  };
+  if (!user.hasProfile) {
+    if (location == RoutePaths.onboarding) return null;
+    return RoutePaths.onboarding;
+  }
+  if (authOnlyPaths.contains(location)) return RoutePaths.home;
+  return null;
 }

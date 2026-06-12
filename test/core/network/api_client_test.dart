@@ -30,26 +30,17 @@ void main() {
 
     test('connectTimeout is 15 seconds', () {
       final dio = container.read(apiClientProvider);
-      expect(
-        dio.options.connectTimeout,
-        const Duration(seconds: 15),
-      );
+      expect(dio.options.connectTimeout, const Duration(seconds: 15));
     });
 
     test('receiveTimeout is 30 seconds', () {
       final dio = container.read(apiClientProvider);
-      expect(
-        dio.options.receiveTimeout,
-        const Duration(seconds: 30),
-      );
+      expect(dio.options.receiveTimeout, const Duration(seconds: 30));
     });
 
     test('Content-Type header is application/json', () {
       final dio = container.read(apiClientProvider);
-      expect(
-        dio.options.headers['Content-Type'],
-        'application/json',
-      );
+      expect(dio.options.headers['Content-Type'], 'application/json');
     });
 
     test('at least two interceptors are attached', () {
@@ -71,9 +62,7 @@ void main() {
     test('overrideWithValue replaces the instance', () {
       final fakeDio = Dio(BaseOptions(baseUrl: 'http://fake.test'));
       final overriddenContainer = ProviderContainer(
-        overrides: [
-          apiClientProvider.overrideWithValue(fakeDio),
-        ],
+        overrides: [apiClientProvider.overrideWithValue(fakeDio)],
       );
       addTearDown(overriddenContainer.dispose);
 

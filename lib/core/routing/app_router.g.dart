@@ -8,42 +8,30 @@ part of 'app_router.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides the [GoRouter] instance for the app.
-///
-/// F0: Single placeholder route at [RoutePaths.home].
-/// TODO(F1): Add splash, login, signup routes + redirect guards.
-/// TODO(F1): Wrap tab routes in ShellRoute with AppBottomNav.
+/// Provides the [GoRouter] instance used by the app.
 
-@ProviderFor(router)
-final routerProvider = RouterProvider._();
+@ProviderFor(appRouter)
+final appRouterProvider = AppRouterProvider._();
 
-/// Provides the [GoRouter] instance for the app.
-///
-/// F0: Single placeholder route at [RoutePaths.home].
-/// TODO(F1): Add splash, login, signup routes + redirect guards.
-/// TODO(F1): Wrap tab routes in ShellRoute with AppBottomNav.
+/// Provides the [GoRouter] instance used by the app.
 
-final class RouterProvider
+final class AppRouterProvider
     extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
     with $Provider<GoRouter> {
-  /// Provides the [GoRouter] instance for the app.
-  ///
-  /// F0: Single placeholder route at [RoutePaths.home].
-  /// TODO(F1): Add splash, login, signup routes + redirect guards.
-  /// TODO(F1): Wrap tab routes in ShellRoute with AppBottomNav.
-  RouterProvider._()
+  /// Provides the [GoRouter] instance used by the app.
+  AppRouterProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'routerProvider',
+        name: r'appRouterProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$routerHash();
+  String debugGetCreateSourceHash() => _$appRouterHash();
 
   @$internal
   @override
@@ -52,7 +40,7 @@ final class RouterProvider
 
   @override
   GoRouter create(Ref ref) {
-    return router(ref);
+    return appRouter(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -64,4 +52,4 @@ final class RouterProvider
   }
 }
 
-String _$routerHash() => r'72f701718d54ac6ec97d8fb9952b86b200b075d6';
+String _$appRouterHash() => r'91701044f0b1b545cc1a84cd1104d043e3189028';

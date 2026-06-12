@@ -9,9 +9,5 @@ void main() {
   // Initialize environment from --dart-define values.
   Env.initialize();
 
-  runApp(
-    const ProviderScope(
-      child: AharaApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: AharaApp()));
 }

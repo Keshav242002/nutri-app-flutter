@@ -31,11 +31,7 @@ Dio apiClient(Ref ref) {
   dio.interceptors.addAll([
     AuthInterceptor(),
     ErrorInterceptor(),
-    if (kDebugMode)
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-      ),
+    if (kDebugMode) LogInterceptor(requestBody: true, responseBody: true),
   ]);
 
   return dio;
