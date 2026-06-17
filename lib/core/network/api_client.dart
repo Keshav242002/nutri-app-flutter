@@ -18,7 +18,7 @@ part 'api_client.g.dart';
 Dio apiClient(Ref ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: Env.instance.apiBaseUrl,
+      baseUrl: Env.apiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {

@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  setUpAll(Env.initialize);
-
   group('apiClientProvider', () {
     late ProviderContainer container;
 
@@ -23,9 +21,9 @@ void main() {
       expect(dio, isA<Dio>());
     });
 
-    test('baseUrl matches Env.instance.apiBaseUrl', () {
+    test('baseUrl matches Env.apiBaseUrl', () {
       final dio = container.read(apiClientProvider);
-      expect(dio.options.baseUrl, Env.instance.apiBaseUrl);
+      expect(dio.options.baseUrl, Env.apiBaseUrl);
     });
 
     test('connectTimeout is 15 seconds', () {
@@ -55,8 +53,8 @@ void main() {
       expect(identical(first, second), isTrue);
     });
 
-    test('dev flavor resolves a non-empty base URL', () {
-      expect(Env.instance.apiBaseUrl, isNotEmpty);
+    test('base URL is non-empty', () {
+      expect(Env.apiBaseUrl, isNotEmpty);
     });
 
     test('overrideWithValue replaces the instance', () {

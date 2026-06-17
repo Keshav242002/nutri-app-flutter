@@ -1,4 +1,3 @@
-import 'package:ahara/core/config/env.dart';
 import 'package:ahara/core/routing/app_router.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
 import 'package:ahara/features/auth/presentation/controllers/auth_controller.dart';
@@ -18,8 +17,6 @@ ProviderContainer _container() => ProviderContainer(
 );
 
 void main() {
-  setUpAll(Env.initialize);
-
   group('appRouterProvider', () {
     late ProviderContainer container;
 

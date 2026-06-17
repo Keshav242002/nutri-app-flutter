@@ -210,8 +210,8 @@ return $default(_that.id,_that.email,_that.firebaseUid,_that.displayName,_that.h
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _User implements User {
   const _User({required this.id, required this.email, required this.firebaseUid, required this.displayName, required this.hasProfile});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

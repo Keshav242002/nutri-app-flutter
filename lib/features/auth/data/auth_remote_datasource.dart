@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/network/envelope.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
@@ -27,12 +29,14 @@ class AuthRemoteDataSource {
   /// Calls `POST /api/v1/auth/register` — idempotent upsert.
   Future<User> register() async {
     final response = await _dio.post<Map<String, dynamic>>('/auth/register');
+    dev.log('POST /auth/register → ${response.data}', name: 'API');
     return EnvelopeParser.parseSuccess(response.data!, User.fromJson);
   }
 
   /// Calls `GET /api/v1/auth/me`.
   Future<User> getMe() async {
     final response = await _dio.get<Map<String, dynamic>>('/auth/me');
+    dev.log('GET /auth/me → ${response.data}', name: 'API');
     return EnvelopeParser.parseSuccess(response.data!, User.fromJson);
   }
 
@@ -42,6 +46,7 @@ class AuthRemoteDataSource {
       '/auth/me',
       data: {'display_name': displayName},
     );
+    dev.log('PATCH /auth/me → ${response.data}', name: 'API');
     return EnvelopeParser.parseSuccess(response.data!, User.fromJson);
   }
 
@@ -66,6 +71,20 @@ class AuthRemoteDataSource {
     );
     return _auth.signInWithCredential(credential);
   }
+
+  /// Signs in with email and password via Firebase.
+  Future<fb.UserCredential> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) =>
+      _auth.signInWithEmailAndPassword(email: email, password: password);
+
+  /// Creates a new Firebase account with email and password.
+  Future<fb.UserCredential> createUserWithEmailAndPassword(
+    String email,
+    String password,
+  ) =>
+      _auth.createUserWithEmailAndPassword(email: email, password: password);
 
   /// Sends a Firebase Email Link to [email].
   Future<void> sendSignInLinkToEmail(String email, String continueUrl) async {

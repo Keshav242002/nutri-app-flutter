@@ -6,6 +6,7 @@ import 'package:ahara/features/auth/presentation/controllers/auth_controller.dar
 import 'package:ahara/features/auth/presentation/screens/login_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/onboarding_slides_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
+import 'package:ahara/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -67,6 +68,20 @@ class RouterErrorPage extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Transition helper
+// ---------------------------------------------------------------------------
+
+/// All route changes use a plain crossfade to avoid platform-default slide /
+/// fade-up transitions that flash white between screens.
+CustomTransitionPage<void> _fadePage(Widget child) =>
+    CustomTransitionPage<void>(
+      child: child,
+
+      transitionsBuilder: (_, animation, __, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+
+// ---------------------------------------------------------------------------
 // Router provider
 // ---------------------------------------------------------------------------
 
@@ -84,17 +99,21 @@ GoRouter appRouter(Ref ref) {
     routes: [
       GoRoute(
         path: RoutePaths.splash,
-        builder: (_, __) => const SplashScreen(),
+        pageBuilder: (_, __) => _fadePage(const SplashScreen()),
       ),
       GoRoute(
         path: RoutePaths.onboardingIntro,
-        builder: (_, __) => const OnboardingSlidesScreen(),
+        pageBuilder: (_, __) => _fadePage(const OnboardingSlidesScreen()),
       ),
-      GoRoute(path: RoutePaths.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        path: RoutePaths.login,
+        pageBuilder: (_, __) => _fadePage(const LoginScreen()),
+      ),
       GoRoute(
         path: RoutePaths.onboarding,
-        builder: (_, __) =>
-            const _PlaceholderScreen(label: 'Onboarding questionnaire'),
+        pageBuilder: (_, __) => _fadePage(
+          const _PlaceholderScreen(label: 'Onboarding questionnaire'),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => _ShellScreen(navigationShell: shell),
@@ -103,7 +122,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.home,
-                builder: (_, __) => const _PlaceholderScreen(label: 'Home'),
+                pageBuilder: (_, __) => _fadePage(const HomeScreen()),
               ),
             ],
           ),
@@ -111,7 +130,8 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.recipes,
-                builder: (_, __) => const _PlaceholderScreen(label: 'Recipes'),
+                pageBuilder: (_, __) =>
+                    _fadePage(const _PlaceholderScreen(label: 'Recipes')),
               ),
             ],
           ),
@@ -119,7 +139,8 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.tracker,
-                builder: (_, __) => const _PlaceholderScreen(label: 'Tracker'),
+                pageBuilder: (_, __) =>
+                    _fadePage(const _PlaceholderScreen(label: 'Tracker')),
               ),
             ],
           ),
@@ -127,7 +148,8 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.profile,
-                builder: (_, __) => const _PlaceholderScreen(label: 'Profile'),
+                pageBuilder: (_, __) =>
+                    _fadePage(const _PlaceholderScreen(label: 'Profile')),
               ),
             ],
           ),
@@ -177,15 +199,13 @@ String? _redirectUnauthenticated(String location) {
 }
 
 String? _redirectAuthenticated(User user, String location) {
+  // Splash is excluded intentionally: the animation plays to completion and
+  // calls context.go() itself. Auto-redirecting here would cut the animation
+  // short and cause a white-frame flash on the transition.
   const authOnlyPaths = {
     RoutePaths.login,
     RoutePaths.onboardingIntro,
-    RoutePaths.splash,
   };
-  if (!user.hasProfile) {
-    if (location == RoutePaths.onboarding) return null;
-    return RoutePaths.onboarding;
-  }
   if (authOnlyPaths.contains(location)) return RoutePaths.home;
   return null;
 }

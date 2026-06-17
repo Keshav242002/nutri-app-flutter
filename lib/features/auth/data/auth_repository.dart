@@ -39,6 +39,40 @@ class AuthRepository {
     }
   }
 
+  /// Signs in with email + password then registers with the backend.
+  Future<Result<User>> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      await _ds.signInWithEmailAndPassword(email, password);
+      return await _wrap(_ds.register);
+    } on AppException catch (e) {
+      return Failure(e);
+    } on fb.FirebaseAuthException catch (e) {
+      return Failure(_mapFirebaseError(e));
+    } on Object catch (e) {
+      return Failure(UnknownException(message: e.toString()));
+    }
+  }
+
+  /// Creates a new account with email + password then registers with backend.
+  Future<Result<User>> signUpWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    try {
+      await _ds.createUserWithEmailAndPassword(email, password);
+      return await _wrap(_ds.register);
+    } on AppException catch (e) {
+      return Failure(e);
+    } on fb.FirebaseAuthException catch (e) {
+      return Failure(_mapFirebaseError(e));
+    } on Object catch (e) {
+      return Failure(UnknownException(message: e.toString()));
+    }
+  }
+
   /// Sends a Firebase Email Link to [email].
   Future<Result<void>> sendEmailLink(String email, String continueUrl) async {
     try {
@@ -107,8 +141,27 @@ class AuthRepository {
             'email': ['Invalid email address.'],
           },
         ),
+        'email-already-in-use' => const ValidationException(
+          fieldErrors: {
+            'email': ['An account with this email already exists.'],
+          },
+        ),
+        'weak-password' => const ValidationException(
+          fieldErrors: {
+            'password': ['Password must be at least 6 characters.'],
+          },
+        ),
+        'wrong-password' ||
+        'invalid-credential' ||
+        'user-not-found' =>
+          const UnauthorizedException(
+            message: 'Incorrect email or password.',
+          ),
         'user-disabled' => const UnauthorizedException(
           message: 'This account has been disabled.',
+        ),
+        'too-many-requests' => const UnauthorizedException(
+          message: 'Too many attempts. Please try again later.',
         ),
         'invalid-action-code' => const UnauthorizedException(
           message: 'Sign-in link is invalid or has expired.',

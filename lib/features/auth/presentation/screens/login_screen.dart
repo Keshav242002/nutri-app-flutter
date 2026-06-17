@@ -1,3 +1,4 @@
+import 'package:ahara/core/providers/toast_provider.dart';
 import 'package:ahara/core/routing/route_paths.dart';
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_radius.dart';
@@ -14,13 +15,15 @@ import 'package:ahara/features/auth/presentation/widgets/email_link_sent_view.da
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Combined login + signup screen.
 ///
-/// Three states live inside the bottom sheet:
+/// States inside the bottom sheet:
 /// A — choose method (Google / Email)
-/// B — email entry + send link
-/// C — email link sent / "check your email"
+/// B — email + password entry (default email flow)
+/// C — email link entry (magic link alternative)
+/// D — email link sent / "check your email"
 class LoginScreen extends ConsumerStatefulWidget {
   /// Creates the [LoginScreen].
   const LoginScreen({super.key});
@@ -31,16 +34,35 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
     _emailCtrl.dispose();
+    _passwordCtrl.dispose();
     super.dispose();
   }
 
   void _onStateChanged(LoginFormState? _, LoginFormState next) {
     next.maybeWhen(
       success: (User __) => context.go(RoutePaths.home),
+      error: (String msg) {
+        ref
+            .read(toastProvider.notifier)
+            .show(msg);
+        ref.read(loginControllerProvider.notifier).goBack();
+      },
+      emailPasswordEntry: (_, __, ___, String? errorMessage) {
+        if (errorMessage != null) {
+          ref
+              .read(toastProvider.notifier)
+              .show(errorMessage);
+          ref
+              .read(loginControllerProvider.notifier)
+              .clearEmailPasswordError();
+        }
+      },
       orElse: () {},
     );
   }
@@ -52,15 +74,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final size = MediaQuery.sizeOf(context);
 
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: AppColors.navyDeep,
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Image panel — Navy placeholder (login_bg.png missing).
           const SizedBox.expand(child: ColoredBox(color: AppColors.navyDeep)),
-
-          // Bottom content sheet — bottom 50%.
           Positioned(
             bottom: 0,
             left: 0,
@@ -78,12 +99,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 top: 28,
                 left: AppSpacing.lg,
                 right: AppSpacing.lg,
-                bottom: MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+                // Extra 48px keeps content above the pinned terms text.
+                bottom: MediaQuery.viewInsetsOf(context).bottom +
+                    safeBottom +
+                    48 +
+                    AppSpacing.md,
               ),
               child: SingleChildScrollView(
                 child: _buildSheetContent(formState),
               ),
             ),
+          ),
+          // Terms always pinned to the absolute bottom of the screen.
+          Positioned(
+            bottom: safeBottom + 12,
+            left: 0,
+            right: 0,
+            child: const _TermsText(),
           ),
         ],
       ),
@@ -93,6 +125,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildSheetContent(LoginFormState state) {
     return state.when(
       chooseMethod: _buildChooseMethod,
+      emailPasswordEntry: _buildEmailPasswordEntry,
+      emailPasswordSubmitting: (String email) =>
+          _buildEmailPasswordEntry(email, '', false, null, loading: true),
       emailEntry: _buildEmailEntry,
       emailLinkSending: (String email) =>
           _buildEmailEntry(email, true, null, loading: true),
@@ -101,7 +136,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           const LoadingState(message: 'Signing you in…'),
       googleSigningIn: _buildGoogleLoading,
       success: _buildSuccessLoading,
-      error: _buildErrorState,
+      // Error is surfaced via toast; render choose-method while toast shows.
+      error: (_) => _buildChooseMethod(),
     );
   }
 
@@ -140,53 +176,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _GoogleButton(onPressed: ctrl.signInWithGoogle),
         const SizedBox(height: 12),
         _EmailMethodButton(onPressed: ctrl.selectEmail),
-        const SizedBox(height: AppSpacing.md),
-        const _TermsText(),
-      ],
-    );
-  }
-
-  Widget _buildErrorState(String msg) {
-    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Center(
-          child: Image.asset(
-            'assets/logo_mark_ligh.png',
-            width: 36,
-            height: 36,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'Welcome to Ahara',
-          style: AppTypography.displayMedium.copyWith(
-            color: AppColors.navyDeep,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Sign in or create your account',
-          style: AppTypography.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 28),
-        _GoogleButton(onPressed: ctrl.signInWithGoogle),
-        const SizedBox(height: 12),
-        _EmailMethodButton(onPressed: ctrl.selectEmail),
-        const SizedBox(height: 12),
-        Text(
-          msg,
-          style: AppTypography.caption.copyWith(color: AppColors.error),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        const _TermsText(),
       ],
     );
   }
@@ -197,7 +186,125 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   static Widget _buildSuccessLoading(User _) =>
       const LoadingState(message: 'Welcome!');
 
-  // --- State B: email entry ---
+  // --- State B: email + password ---
+
+  Widget _buildEmailPasswordEntry(
+    String email,
+    String password,
+    bool isSignUpMode,
+    String? errorMessage, {
+    bool loading = false,
+  }) {
+    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
+    if (_emailCtrl.text != email) _emailCtrl.text = email;
+    if (_passwordCtrl.text != password) _passwordCtrl.text = password;
+
+    final isValid = email.isNotEmpty && password.length >= 6;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
+            icon: const Icon(Icons.chevron_left_rounded),
+            color: AppColors.navyDeep.withValues(alpha: 0.5),
+            onPressed: ctrl.goBack,
+            padding: EdgeInsets.zero,
+          ),
+        ),
+        Text(
+          isSignUpMode ? 'Create account' : 'Sign in',
+          style: AppTypography.displayMedium.copyWith(
+            color: AppColors.navyDeep,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Text(
+              isSignUpMode
+                  ? 'Already have an account? '
+                  : "Don't have an account? ",
+              style: AppTypography.labelMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            GestureDetector(
+              onTap: ctrl.toggleSignUpMode,
+              child: Text(
+                isSignUpMode ? 'Sign in' : 'Create one',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.turmeric,
+                  decoration: TextDecoration.underline,
+                  decorationColor: AppColors.turmeric,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        AppTextField(
+          controller: _emailCtrl,
+          placeholder: 'yourname@email.com',
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          autofocus: true,
+          onChanged: ctrl.updateEmailForPassword,
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: _passwordCtrl,
+          placeholder: 'Password',
+          keyboardType: TextInputType.visiblePassword,
+          textInputAction: TextInputAction.done,
+          obscureText: _obscurePassword,
+          onChanged: ctrl.updatePasswordField,
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              size: 20,
+              color: AppColors.textHint,
+            ),
+            onPressed: () =>
+                setState(() => _obscurePassword = !_obscurePassword),
+          ),
+          onSubmitted: isValid
+              ? (_) => ctrl.submitEmailPassword(
+                    _emailCtrl.text,
+                    _passwordCtrl.text,
+                  )
+              : null,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppButton(
+          label: isSignUpMode ? 'Create account' : 'Sign in',
+          onPressed: isValid
+              ? () => ctrl.submitEmailPassword(
+                    _emailCtrl.text,
+                    _passwordCtrl.text,
+                  )
+              : null,
+          isLoading: loading,
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: ctrl.switchToMagicLink,
+          child: Text(
+            'Use magic link instead',
+            style: AppTypography.labelMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- State C: email link entry ---
 
   Widget _buildEmailEntry(
     String email,
@@ -244,20 +351,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           onChanged: ctrl.updateEmail,
           errorText: errorMessage,
           onSubmitted: isValid
-              ? (_) => ctrl.sendEmailLink(_emailCtrl.text)
+              ? (_) => _sendLinkAndSaveEmail(_emailCtrl.text, ctrl)
               : null,
         ),
         const SizedBox(height: AppSpacing.md),
         AppButton(
           label: 'Send sign-in link',
-          onPressed: isValid ? () => ctrl.sendEmailLink(_emailCtrl.text) : null,
+          onPressed: isValid
+              ? () => _sendLinkAndSaveEmail(_emailCtrl.text, ctrl)
+              : null,
           isLoading: loading,
         ),
       ],
     );
   }
 
-  // --- State C: email link sent ---
+  Future<void> _sendLinkAndSaveEmail(
+    String email,
+    LoginController ctrl,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('pendingEmailForLink', email);
+    await ctrl.sendEmailLink(email);
+  }
+
+  // --- State D: email link sent ---
 
   Widget _buildEmailLinkSent(String email, int countdown) {
     final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
@@ -323,7 +441,7 @@ class _EmailMethodButton extends StatelessWidget {
           textStyle: AppTypography.labelMedium,
         ),
         icon: const Icon(Icons.mail_outline_rounded, size: 20),
-        label: const Text('Continue with email / OTP'),
+        label: const Text('Continue with email'),
       ),
     );
   }

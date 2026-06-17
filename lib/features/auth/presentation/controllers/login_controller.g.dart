@@ -11,6 +11,7 @@ part of 'login_controller.dart';
 /// Manages the login screen state machine.
 ///
 /// State transitions:
+/// chooseMethod → emailPasswordEntry → emailPasswordSubmitting → success
 /// chooseMethod → emailEntry → emailLinkSending → emailLinkSent
 /// chooseMethod → googleSigningIn → success
 
@@ -20,6 +21,7 @@ final loginControllerProvider = LoginControllerProvider._();
 /// Manages the login screen state machine.
 ///
 /// State transitions:
+/// chooseMethod → emailPasswordEntry → emailPasswordSubmitting → success
 /// chooseMethod → emailEntry → emailLinkSending → emailLinkSent
 /// chooseMethod → googleSigningIn → success
 final class LoginControllerProvider
@@ -27,6 +29,7 @@ final class LoginControllerProvider
   /// Manages the login screen state machine.
   ///
   /// State transitions:
+  /// chooseMethod → emailPasswordEntry → emailPasswordSubmitting → success
   /// chooseMethod → emailEntry → emailLinkSending → emailLinkSent
   /// chooseMethod → googleSigningIn → success
   LoginControllerProvider._()
@@ -56,11 +59,12 @@ final class LoginControllerProvider
   }
 }
 
-String _$loginControllerHash() => r'cc47362deae027f9765271240853bcd7eeff5f6a';
+String _$loginControllerHash() => r'a047d681c788e79332c6d19e97baf5a954945e33';
 
 /// Manages the login screen state machine.
 ///
 /// State transitions:
+/// chooseMethod → emailPasswordEntry → emailPasswordSubmitting → success
 /// chooseMethod → emailEntry → emailLinkSending → emailLinkSent
 /// chooseMethod → googleSigningIn → success
 

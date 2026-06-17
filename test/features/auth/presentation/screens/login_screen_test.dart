@@ -85,11 +85,15 @@ void main() {
   });
 
   group('LoginScreen — error state', () {
-    testWidgets('shows error message', (tester) async {
+    testWidgets('falls back to choose-method UI (error surfaced via toast)',
+        (tester) async {
       await tester.pumpWidget(
         _wrap(state: const LoginFormState.error('Something went wrong')),
       );
-      expect(find.textContaining('Something went wrong'), findsOneWidget);
+      // Error text is not rendered inline; the screen shows chooseMethod
+      // while the toast dismisses above it.
+      expect(find.textContaining('Something went wrong'), findsNothing);
+      expect(find.text('Continue with Google'), findsOneWidget);
     });
   });
 }

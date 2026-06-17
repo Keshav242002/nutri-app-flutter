@@ -76,6 +76,10 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
       backgroundColor: AppColors.navyDeep,
       body: Stack(
         children: [
+          // Full-bleed filler so the Stack fills the screen; otherwise it
+          // collapses to the image height and the sheet floats up the screen.
+          const SizedBox.expand(child: ColoredBox(color: AppColors.navyDeep)),
+
           // Image panel — full bleed top zone.
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
@@ -242,6 +246,9 @@ class _NavNextButton extends StatelessWidget {
         backgroundColor: AppColors.navyDeep,
         foregroundColor: AppColors.cream,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
+        // Override the theme's full-width minimumSize: this button sits in a
+        // spaceBetween Row and must size to its content.
+        minimumSize: const Size(0, 52),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
           vertical: 14,

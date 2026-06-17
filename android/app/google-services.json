@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "1096443926227",
+    "project_id": "nutri-app-28ff6",
+    "storage_bucket": "nutri-app-28ff6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1096443926227:android:27ab76ac6a6f5145ece626",
+        "android_client_info": {
+          "package_name": "com.ahara.ahara"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1096443926227-6jkesrnpejibh4ia64uosefnjsl1137q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ahara.ahara",
+            "certificate_hash": "622519ea7b2b2f277bc2ddaef81c1c498c93cea2"
+          }
+        },
+        {
+          "client_id": "1096443926227-0tn8m02cceue8mtsq70mvad34icn8isi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnEEpC-yQsWQv2TiqWAkNN_utcp7TvphQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1096443926227-0tn8m02cceue8mtsq70mvad34icn8isi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1096443926227-i9jeq9m20gtkktvfgke6hfbl069iqeab.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ahara.ahara"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1096443926227:android:9ca0ad5014a8c485ece626",
+        "android_client_info": {
+          "package_name": "com.ahara.ahara.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1096443926227-16be3akcjpfi6m0fhh1j1csprgv84a1u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ahara.ahara.dev",
+            "certificate_hash": "622519ea7b2b2f277bc2ddaef81c1c498c93cea2"
+          }
+        },
+        {
+          "client_id": "1096443926227-0tn8m02cceue8mtsq70mvad34icn8isi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnEEpC-yQsWQv2TiqWAkNN_utcp7TvphQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1096443926227-0tn8m02cceue8mtsq70mvad34icn8isi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1096443926227-i9jeq9m20gtkktvfgke6hfbl069iqeab.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ahara.ahara"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -47,13 +47,17 @@ void main() {
       );
     });
 
-    test('selectEmail() → emailEntry with empty email', () {
+    test('selectEmail() → emailPasswordEntry with empty fields', () {
       final c = _container();
       addTearDown(c.dispose);
       c.read(loginControllerProvider.notifier).selectEmail();
       expect(
         c.read(loginControllerProvider),
-        equals(const LoginFormState.emailEntry(email: '', isValid: false)),
+        equals(const LoginFormState.emailPasswordEntry(
+          email: '',
+          password: '',
+          isSignUpMode: false,
+        )),
       );
     });
 

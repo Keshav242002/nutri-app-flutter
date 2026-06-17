@@ -7,6 +7,8 @@ part 'user_model.g.dart';
 @freezed
 abstract class User with _$User {
   /// Creates a [User].
+  // ignore: invalid_annotation_target
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory User({
     required int id,
     required String email,

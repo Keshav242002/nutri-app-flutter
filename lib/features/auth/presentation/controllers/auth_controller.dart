@@ -31,10 +31,29 @@ class AuthController extends _$AuthController {
     state = AsyncData(await _loadUser(ref.read(authRepositoryProvider)));
   }
 
+  /// Updates the current user's display name and refreshes state.
+  Future<void> updateDisplayName(String name) async {
+    final result =
+        await ref.read(authRepositoryProvider).updateDisplayName(name);
+    result.when(
+      success: (User user) =>
+          state = AsyncData(AuthState.authenticated(user)),
+      failure: (_) {},
+    );
+  }
+
   /// Signs the user out and resets state to unauthenticated.
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
     state = const AsyncData(AuthState.unauthenticated());
+  }
+
+  /// Immediately marks the session as authenticated with [user].
+  ///
+  /// Called after a successful sign-in so the router redirect sees the
+  /// correct state before navigation fires.
+  void setAuthenticated(User user) {
+    state = AsyncData(AuthState.authenticated(user));
   }
 
   /// Returns the authenticated [User] or `null`.

@@ -34,6 +34,19 @@ sealed class LoginFormState with _$LoginFormState {
   const factory LoginFormState.emailLinkVerifying({required String email}) =
       _EmailLinkVerifying;
 
+  /// Email + password form — user is entering credentials.
+  const factory LoginFormState.emailPasswordEntry({
+    required String email,
+    required String password,
+    required bool isSignUpMode,
+    String? errorMessage,
+  }) = _EmailPasswordEntry;
+
+  /// Email + password submit in flight.
+  const factory LoginFormState.emailPasswordSubmitting({
+    required String email,
+  }) = _EmailPasswordSubmitting;
+
   /// Google sign-in in progress.
   const factory LoginFormState.googleSigningIn() = _GoogleSigningIn;
 

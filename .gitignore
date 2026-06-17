@@ -46,3 +46,24 @@ app.*.map.json
 
 # Project documentation — managed outside version control
 docs/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.*
+!.env.example
+
+# ── Ruflo / AI agent (fully untracked) ──────────────────────────────────────
+.claude/
+.claude-flow/
+.swarm/
+.ruflo/
+
+# Ruflo / Claude generated files
+.mcp.json
+claude-flow.config.json
+settings.json
+ruvector.db
+*.db
+CLAUDE.md
+CLAUDE.local.md

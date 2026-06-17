@@ -76,7 +76,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ),
     );
 
-    // Phase 4 — fade to Cream after 800ms hold (1550–1750ms)
+    // Phase 4 — fade content out after 800ms hold (1550–1750ms).
+    // Fades to navy (not cream) so the router's crossfade into the next screen
+    // is navy→navy with no colour bleed-through.
     _screenFade = Tween<double>(begin: 1, end: 0).animate(
       CurvedAnimation(
         parent: _ctrl,
@@ -123,11 +125,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       backgroundColor: AppColors.navyDeep,
       body: AnimatedBuilder(
         animation: _ctrl,
-        builder: (context, _) => ColorFiltered(
-          colorFilter: ColorFilter.mode(
-            AppColors.cream.withValues(alpha: 1 - _screenFade.value),
-            BlendMode.srcOver,
-          ),
+        builder: (context, _) => Opacity(
+          opacity: _screenFade.value,
           child: SizedBox.expand(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
