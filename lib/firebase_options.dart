@@ -62,8 +62,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1096443926227',
     projectId: 'nutri-app-28ff6',
     storageBucket: 'nutri-app-28ff6.firebasestorage.app',
-    androidClientId: '1096443926227-16be3akcjpfi6m0fhh1j1csprgv84a1u.apps.googleusercontent.com',
-    iosClientId: '1096443926227-i9jeq9m20gtkktvfgke6hfbl069iqeab.apps.googleusercontent.com',
+    androidClientId:
+        '1096443926227-16be3akcjpfi6m0fhh1j1csprgv84a1u.apps.googleusercontent.com',
+    iosClientId:
+        '1096443926227-i9jeq9m20gtkktvfgke6hfbl069iqeab.apps.googleusercontent.com',
     iosBundleId: 'com.ahara.ahara',
   );
 }

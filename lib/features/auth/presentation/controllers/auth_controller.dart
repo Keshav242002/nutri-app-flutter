@@ -21,23 +21,24 @@ class AuthController extends _$AuthController {
   }
 
   /// Refreshes user from the backend and updates state.
+  ///
+  /// Intentionally skips AsyncLoading to avoid triggering the splash redirect.
   Future<void> refresh() async {
     final firebaseUser = fb.FirebaseAuth.instance.currentUser;
     if (firebaseUser == null) {
       state = const AsyncData(AuthState.unauthenticated());
       return;
     }
-    state = const AsyncLoading<AuthState>();
     state = AsyncData(await _loadUser(ref.read(authRepositoryProvider)));
   }
 
   /// Updates the current user's display name and refreshes state.
   Future<void> updateDisplayName(String name) async {
-    final result =
-        await ref.read(authRepositoryProvider).updateDisplayName(name);
+    final result = await ref
+        .read(authRepositoryProvider)
+        .updateDisplayName(name);
     result.when(
-      success: (User user) =>
-          state = AsyncData(AuthState.authenticated(user)),
+      success: (User user) => state = AsyncData(AuthState.authenticated(user)),
       failure: (_) {},
     );
   }

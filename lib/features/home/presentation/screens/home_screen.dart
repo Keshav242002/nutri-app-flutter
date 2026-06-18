@@ -138,8 +138,9 @@ class _ProfileBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = hasProfile ? AppColors.success : AppColors.turmeric;
-    final icon =
-        hasProfile ? Icons.check_circle_rounded : Icons.pending_rounded;
+    final icon = hasProfile
+        ? Icons.check_circle_rounded
+        : Icons.pending_rounded;
     final label = hasProfile ? 'Profile complete' : 'Profile pending';
 
     return Container(
@@ -153,10 +154,7 @@ class _ProfileBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: AppTypography.labelMedium.copyWith(color: color),
-          ),
+          Text(label, style: AppTypography.labelMedium.copyWith(color: color)),
         ],
       ),
     );
@@ -181,18 +179,14 @@ class _NameCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.navyDeep.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: AppColors.navyDeep.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             "What's your name?",
-            style: AppTypography.labelLarge.copyWith(
-              color: AppColors.navyDeep,
-            ),
+            style: AppTypography.labelLarge.copyWith(color: AppColors.navyDeep),
           ),
           const SizedBox(height: AppSpacing.sm),
           AppTextField(
@@ -203,7 +197,6 @@ class _NameCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           AppButton(label: 'Save', onPressed: onSave, isLoading: saving),
-
         ],
       ),
     );

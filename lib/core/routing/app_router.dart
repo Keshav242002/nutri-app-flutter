@@ -7,6 +7,9 @@ import 'package:ahara/features/auth/presentation/screens/login_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/onboarding_slides_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
 import 'package:ahara/features/home/presentation/screens/home_screen.dart';
+import 'package:ahara/features/onboarding/domain/models/dietary_profile.dart';
+import 'package:ahara/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:ahara/features/onboarding/presentation/screens/your_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -85,16 +88,38 @@ CustomTransitionPage<void> _fadePage(Widget child) =>
 // Router provider
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Auth change notifier — lets GoRouter re-evaluate redirects without
+// recreating the router instance (which would reset navigation to /splash).
+// ---------------------------------------------------------------------------
+
+class _AuthNotifier extends ChangeNotifier {
+  _AuthNotifier(AsyncValue<AuthState> initial) : _authState = initial;
+
+  AsyncValue<AuthState> _authState;
+  AsyncValue<AuthState> get authState => _authState;
+
+  void update(AsyncValue<AuthState> next) {
+    _authState = next;
+    notifyListeners();
+  }
+}
+
 /// Provides the [GoRouter] instance used by the app.
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  final authState = ref.watch<AsyncValue<AuthState>>(authControllerProvider);
+  final notifier = _AuthNotifier(ref.read(authControllerProvider));
+  ref.listen<AsyncValue<AuthState>>(authControllerProvider, (_, next) {
+    notifier.update(next);
+  });
+  ref.onDispose(notifier.dispose);
 
   return GoRouter(
     initialLocation: RoutePaths.splash,
     debugLogDiagnostics: true,
+    refreshListenable: notifier,
     redirect: (BuildContext context, GoRouterState state) =>
-        _redirect(authState, state),
+        _redirect(notifier.authState, state),
     errorBuilder: (_, __) => const RouterErrorPage(),
     routes: [
       GoRoute(
@@ -111,9 +136,22 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: RoutePaths.onboarding,
-        pageBuilder: (_, __) => _fadePage(
-          const _PlaceholderScreen(label: 'Onboarding questionnaire'),
-        ),
+        pageBuilder: (_, __) => _fadePage(const OnboardingScreen()),
+      ),
+      GoRoute(
+        path: RoutePaths.yourPlan,
+        pageBuilder: (context, state) {
+          final extra = state.extra;
+          final DietaryProfile profile;
+          if (extra is DietaryProfile) {
+            profile = extra;
+          } else {
+            // GoRouter rebuilds after refreshListenable may re-create route
+            // state from serialized form, turning the extra into a plain Map.
+            profile = DietaryProfile.fromJson(extra! as Map<String, dynamic>);
+          }
+          return _fadePage(YourPlanScreen(profile: profile));
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, shell) => _ShellScreen(navigationShell: shell),
@@ -199,13 +237,15 @@ String? _redirectUnauthenticated(String location) {
 }
 
 String? _redirectAuthenticated(User user, String location) {
-  // Splash is excluded intentionally: the animation plays to completion and
-  // calls context.go() itself. Auto-redirecting here would cut the animation
-  // short and cause a white-frame flash on the transition.
-  const authOnlyPaths = {
-    RoutePaths.login,
-    RoutePaths.onboardingIntro,
-  };
+  // Splash controls its own navigation — let the animation complete first.
+  if (location == RoutePaths.splash) return null;
+
+  const postAuthPaths = {RoutePaths.onboarding, RoutePaths.yourPlan};
+  if (!user.hasProfile && !postAuthPaths.contains(location)) {
+    return RoutePaths.onboarding;
+  }
+
+  const authOnlyPaths = {RoutePaths.login, RoutePaths.onboardingIntro};
   if (authOnlyPaths.contains(location)) return RoutePaths.home;
   return null;
 }

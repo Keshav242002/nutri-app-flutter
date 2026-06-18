@@ -26,4 +26,7 @@ abstract final class RoutePaths {
 
   /// User profile screen.
   static const profile = '/profile';
+
+  /// F2 computed-targets summary after onboarding submit.
+  static const yourPlan = '/your-plan';
 }

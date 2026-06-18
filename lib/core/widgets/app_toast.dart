@@ -32,14 +32,14 @@ class ToastOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final toast = ref.watch(toastProvider);
-    final safeTop = MediaQuery.paddingOf(context).top;
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return Stack(
       fit: StackFit.expand,
       children: [
         child,
         Positioned(
-          top: safeTop + AppSpacing.sm,
+          bottom: safeBottom + AppSpacing.md,
           left: AppSpacing.md,
           right: AppSpacing.md,
           child: AnimatedSwitcher(
@@ -48,7 +48,7 @@ class ToastOverlay extends ConsumerWidget {
             switchOutCurve: Curves.easeIn,
             transitionBuilder: (child, animation) => SlideTransition(
               position: Tween<Offset>(
-                begin: const Offset(0, -1.5),
+                begin: const Offset(0, 1.5),
                 end: Offset.zero,
               ).animate(animation),
               child: FadeTransition(opacity: animation, child: child),

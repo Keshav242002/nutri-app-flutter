@@ -76,15 +76,13 @@ class AuthRemoteDataSource {
   Future<fb.UserCredential> signInWithEmailAndPassword(
     String email,
     String password,
-  ) =>
-      _auth.signInWithEmailAndPassword(email: email, password: password);
+  ) => _auth.signInWithEmailAndPassword(email: email, password: password);
 
   /// Creates a new Firebase account with email and password.
   Future<fb.UserCredential> createUserWithEmailAndPassword(
     String email,
     String password,
-  ) =>
-      _auth.createUserWithEmailAndPassword(email: email, password: password);
+  ) => _auth.createUserWithEmailAndPassword(email: email, password: password);
 
   /// Sends a Firebase Email Link to [email].
   Future<void> sendSignInLinkToEmail(String email, String continueUrl) async {

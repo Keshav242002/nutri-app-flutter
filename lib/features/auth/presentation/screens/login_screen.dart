@@ -48,19 +48,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     next.maybeWhen(
       success: (User __) => context.go(RoutePaths.home),
       error: (String msg) {
-        ref
-            .read(toastProvider.notifier)
-            .show(msg);
+        ref.read(toastProvider.notifier).show(msg);
         ref.read(loginControllerProvider.notifier).goBack();
       },
       emailPasswordEntry: (_, __, ___, String? errorMessage) {
         if (errorMessage != null) {
-          ref
-              .read(toastProvider.notifier)
-              .show(errorMessage);
-          ref
-              .read(loginControllerProvider.notifier)
-              .clearEmailPasswordError();
+          ref.read(toastProvider.notifier).show(errorMessage);
+          ref.read(loginControllerProvider.notifier).clearEmailPasswordError();
         }
       },
       orElse: () {},
@@ -100,7 +94,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 left: AppSpacing.lg,
                 right: AppSpacing.lg,
                 // Extra 48px keeps content above the pinned terms text.
-                bottom: MediaQuery.viewInsetsOf(context).bottom +
+                bottom:
+                    MediaQuery.viewInsetsOf(context).bottom +
                     safeBottom +
                     48 +
                     AppSpacing.md,
@@ -274,9 +269,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           onSubmitted: isValid
               ? (_) => ctrl.submitEmailPassword(
-                    _emailCtrl.text,
-                    _passwordCtrl.text,
-                  )
+                  _emailCtrl.text,
+                  _passwordCtrl.text,
+                )
               : null,
         ),
         const SizedBox(height: AppSpacing.md),
@@ -284,9 +279,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           label: isSignUpMode ? 'Create account' : 'Sign in',
           onPressed: isValid
               ? () => ctrl.submitEmailPassword(
-                    _emailCtrl.text,
-                    _passwordCtrl.text,
-                  )
+                  _emailCtrl.text,
+                  _passwordCtrl.text,
+                )
               : null,
           isLoading: loading,
         ),
@@ -366,10 +361,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Future<void> _sendLinkAndSaveEmail(
-    String email,
-    LoginController ctrl,
-  ) async {
+  Future<void> _sendLinkAndSaveEmail(String email, LoginController ctrl) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('pendingEmailForLink', email);
     await ctrl.sendEmailLink(email);

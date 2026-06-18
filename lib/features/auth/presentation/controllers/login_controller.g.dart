@@ -59,7 +59,7 @@ final class LoginControllerProvider
   }
 }
 
-String _$loginControllerHash() => r'a047d681c788e79332c6d19e97baf5a954945e33';
+String _$loginControllerHash() => r'094d897c6f4de4723b3c910be233b52020cadd81';
 
 /// Manages the login screen state machine.
 ///
