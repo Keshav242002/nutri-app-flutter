@@ -17,11 +17,14 @@ mixin _$DietaryProfile {
 
 // Required fields (submitted + echoed back)
  String get dateOfBirth; String get sex; int get heightCm; String get activityLevel; String get goal; String get primaryCuisineRegion; String get spiceTolerance; String get dietPattern; String get cookingFrequency; String get skillLevel;// Optional / defaulted submitted fields
- double get weightKg; List<String> get secondaryCuisinePreferences; bool get noOnionGarlic; List<String> get allergies; List<String> get dislikes; double? get dailyFoodBudgetInr; double? get weeklyFoodBudgetInr; int get householdSize; int get maxPrepTimeMin; String? get timezone;// Read-only computed fields
- int? get targetCalories;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromJson) double? get targetProteinG;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromJson) double? get targetCarbsG;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromJson) double? get targetFatG;// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJsonRequired) double get weightKg; List<String> get secondaryCuisinePreferences; bool get noOnionGarlic; List<String> get allergies; List<String> get dislikes;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJson) double? get dailyFoodBudgetInr;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJson) double? get weeklyFoodBudgetInr; int get householdSize; int get maxPrepTimeMin; String? get timezone;// Read-only computed fields
+ int? get targetCalories;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJson) double? get targetProteinG;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJson) double? get targetCarbsG;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(fromJson: _doubleFromJson) double? get targetFatG;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @JsonKey(fromJson: _doubleFromJson) double? get targetFiberG; int? get age; DateTime? get createdAt; DateTime? get updatedAt;
 /// Create a copy of DietaryProfile
 /// with the given fields replaced by the non-null parameter values.
@@ -55,7 +58,7 @@ abstract mixin class $DietaryProfileCopyWith<$Res>  {
   factory $DietaryProfileCopyWith(DietaryProfile value, $Res Function(DietaryProfile) _then) = _$DietaryProfileCopyWithImpl;
 @useResult
 $Res call({
- String dateOfBirth, String sex, int heightCm, String activityLevel, String goal, String primaryCuisineRegion, String spiceTolerance, String dietPattern, String cookingFrequency, String skillLevel, double weightKg, List<String> secondaryCuisinePreferences, bool noOnionGarlic, List<String> allergies, List<String> dislikes, double? dailyFoodBudgetInr, double? weeklyFoodBudgetInr, int householdSize, int maxPrepTimeMin, String? timezone, int? targetCalories,@JsonKey(fromJson: _doubleFromJson) double? targetProteinG,@JsonKey(fromJson: _doubleFromJson) double? targetCarbsG,@JsonKey(fromJson: _doubleFromJson) double? targetFatG,@JsonKey(fromJson: _doubleFromJson) double? targetFiberG, int? age, DateTime? createdAt, DateTime? updatedAt
+ String dateOfBirth, String sex, int heightCm, String activityLevel, String goal, String primaryCuisineRegion, String spiceTolerance, String dietPattern, String cookingFrequency, String skillLevel,@JsonKey(fromJson: _doubleFromJsonRequired) double weightKg, List<String> secondaryCuisinePreferences, bool noOnionGarlic, List<String> allergies, List<String> dislikes,@JsonKey(fromJson: _doubleFromJson) double? dailyFoodBudgetInr,@JsonKey(fromJson: _doubleFromJson) double? weeklyFoodBudgetInr, int householdSize, int maxPrepTimeMin, String? timezone, int? targetCalories,@JsonKey(fromJson: _doubleFromJson) double? targetProteinG,@JsonKey(fromJson: _doubleFromJson) double? targetCarbsG,@JsonKey(fromJson: _doubleFromJson) double? targetFatG,@JsonKey(fromJson: _doubleFromJson) double? targetFiberG, int? age, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -187,7 +190,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel,  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes,  double? dailyFoodBudgetInr,  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel, @JsonKey(fromJson: _doubleFromJsonRequired)  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes, @JsonKey(fromJson: _doubleFromJson)  double? dailyFoodBudgetInr, @JsonKey(fromJson: _doubleFromJson)  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DietaryProfile() when $default != null:
 return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_that.goal,_that.primaryCuisineRegion,_that.spiceTolerance,_that.dietPattern,_that.cookingFrequency,_that.skillLevel,_that.weightKg,_that.secondaryCuisinePreferences,_that.noOnionGarlic,_that.allergies,_that.dislikes,_that.dailyFoodBudgetInr,_that.weeklyFoodBudgetInr,_that.householdSize,_that.maxPrepTimeMin,_that.timezone,_that.targetCalories,_that.targetProteinG,_that.targetCarbsG,_that.targetFatG,_that.targetFiberG,_that.age,_that.createdAt,_that.updatedAt);case _:
@@ -208,7 +211,7 @@ return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel,  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes,  double? dailyFoodBudgetInr,  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel, @JsonKey(fromJson: _doubleFromJsonRequired)  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes, @JsonKey(fromJson: _doubleFromJson)  double? dailyFoodBudgetInr, @JsonKey(fromJson: _doubleFromJson)  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _DietaryProfile():
 return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_that.goal,_that.primaryCuisineRegion,_that.spiceTolerance,_that.dietPattern,_that.cookingFrequency,_that.skillLevel,_that.weightKg,_that.secondaryCuisinePreferences,_that.noOnionGarlic,_that.allergies,_that.dislikes,_that.dailyFoodBudgetInr,_that.weeklyFoodBudgetInr,_that.householdSize,_that.maxPrepTimeMin,_that.timezone,_that.targetCalories,_that.targetProteinG,_that.targetCarbsG,_that.targetFatG,_that.targetFiberG,_that.age,_that.createdAt,_that.updatedAt);case _:
@@ -228,7 +231,7 @@ return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel,  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes,  double? dailyFoodBudgetInr,  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String dateOfBirth,  String sex,  int heightCm,  String activityLevel,  String goal,  String primaryCuisineRegion,  String spiceTolerance,  String dietPattern,  String cookingFrequency,  String skillLevel, @JsonKey(fromJson: _doubleFromJsonRequired)  double weightKg,  List<String> secondaryCuisinePreferences,  bool noOnionGarlic,  List<String> allergies,  List<String> dislikes, @JsonKey(fromJson: _doubleFromJson)  double? dailyFoodBudgetInr, @JsonKey(fromJson: _doubleFromJson)  double? weeklyFoodBudgetInr,  int householdSize,  int maxPrepTimeMin,  String? timezone,  int? targetCalories, @JsonKey(fromJson: _doubleFromJson)  double? targetProteinG, @JsonKey(fromJson: _doubleFromJson)  double? targetCarbsG, @JsonKey(fromJson: _doubleFromJson)  double? targetFatG, @JsonKey(fromJson: _doubleFromJson)  double? targetFiberG,  int? age,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _DietaryProfile() when $default != null:
 return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_that.goal,_that.primaryCuisineRegion,_that.spiceTolerance,_that.dietPattern,_that.cookingFrequency,_that.skillLevel,_that.weightKg,_that.secondaryCuisinePreferences,_that.noOnionGarlic,_that.allergies,_that.dislikes,_that.dailyFoodBudgetInr,_that.weeklyFoodBudgetInr,_that.householdSize,_that.maxPrepTimeMin,_that.timezone,_that.targetCalories,_that.targetProteinG,_that.targetCarbsG,_that.targetFatG,_that.targetFiberG,_that.age,_that.createdAt,_that.updatedAt);case _:
@@ -243,7 +246,7 @@ return $default(_that.dateOfBirth,_that.sex,_that.heightCm,_that.activityLevel,_
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _DietaryProfile implements DietaryProfile {
-  const _DietaryProfile({required this.dateOfBirth, required this.sex, required this.heightCm, required this.activityLevel, required this.goal, required this.primaryCuisineRegion, required this.spiceTolerance, required this.dietPattern, required this.cookingFrequency, required this.skillLevel, this.weightKg = 0.0, final  List<String> secondaryCuisinePreferences = const [], this.noOnionGarlic = false, final  List<String> allergies = const [], final  List<String> dislikes = const [], this.dailyFoodBudgetInr, this.weeklyFoodBudgetInr, this.householdSize = 1, this.maxPrepTimeMin = 30, this.timezone, this.targetCalories, @JsonKey(fromJson: _doubleFromJson) this.targetProteinG, @JsonKey(fromJson: _doubleFromJson) this.targetCarbsG, @JsonKey(fromJson: _doubleFromJson) this.targetFatG, @JsonKey(fromJson: _doubleFromJson) this.targetFiberG, this.age, this.createdAt, this.updatedAt}): _secondaryCuisinePreferences = secondaryCuisinePreferences,_allergies = allergies,_dislikes = dislikes;
+  const _DietaryProfile({required this.dateOfBirth, required this.sex, required this.heightCm, required this.activityLevel, required this.goal, required this.primaryCuisineRegion, required this.spiceTolerance, required this.dietPattern, required this.cookingFrequency, required this.skillLevel, @JsonKey(fromJson: _doubleFromJsonRequired) this.weightKg = 0.0, final  List<String> secondaryCuisinePreferences = const [], this.noOnionGarlic = false, final  List<String> allergies = const [], final  List<String> dislikes = const [], @JsonKey(fromJson: _doubleFromJson) this.dailyFoodBudgetInr, @JsonKey(fromJson: _doubleFromJson) this.weeklyFoodBudgetInr, this.householdSize = 1, this.maxPrepTimeMin = 30, this.timezone, this.targetCalories, @JsonKey(fromJson: _doubleFromJson) this.targetProteinG, @JsonKey(fromJson: _doubleFromJson) this.targetCarbsG, @JsonKey(fromJson: _doubleFromJson) this.targetFatG, @JsonKey(fromJson: _doubleFromJson) this.targetFiberG, this.age, this.createdAt, this.updatedAt}): _secondaryCuisinePreferences = secondaryCuisinePreferences,_allergies = allergies,_dislikes = dislikes;
   factory _DietaryProfile.fromJson(Map<String, dynamic> json) => _$DietaryProfileFromJson(json);
 
 // Required fields (submitted + echoed back)
@@ -258,7 +261,8 @@ class _DietaryProfile implements DietaryProfile {
 @override final  String cookingFrequency;
 @override final  String skillLevel;
 // Optional / defaulted submitted fields
-@override@JsonKey() final  double weightKg;
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@override@JsonKey(fromJson: _doubleFromJsonRequired) final  double weightKg;
  final  List<String> _secondaryCuisinePreferences;
 @override@JsonKey() List<String> get secondaryCuisinePreferences {
   if (_secondaryCuisinePreferences is EqualUnmodifiableListView) return _secondaryCuisinePreferences;
@@ -281,20 +285,22 @@ class _DietaryProfile implements DietaryProfile {
   return EqualUnmodifiableListView(_dislikes);
 }
 
-@override final  double? dailyFoodBudgetInr;
-@override final  double? weeklyFoodBudgetInr;
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@override@JsonKey(fromJson: _doubleFromJson) final  double? dailyFoodBudgetInr;
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@override@JsonKey(fromJson: _doubleFromJson) final  double? weeklyFoodBudgetInr;
 @override@JsonKey() final  int householdSize;
 @override@JsonKey() final  int maxPrepTimeMin;
 @override final  String? timezone;
 // Read-only computed fields
 @override final  int? targetCalories;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(fromJson: _doubleFromJson) final  double? targetProteinG;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(fromJson: _doubleFromJson) final  double? targetCarbsG;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(fromJson: _doubleFromJson) final  double? targetFatG;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(fromJson: _doubleFromJson) final  double? targetFiberG;
 @override final  int? age;
 @override final  DateTime? createdAt;
@@ -333,7 +339,7 @@ abstract mixin class _$DietaryProfileCopyWith<$Res> implements $DietaryProfileCo
   factory _$DietaryProfileCopyWith(_DietaryProfile value, $Res Function(_DietaryProfile) _then) = __$DietaryProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String dateOfBirth, String sex, int heightCm, String activityLevel, String goal, String primaryCuisineRegion, String spiceTolerance, String dietPattern, String cookingFrequency, String skillLevel, double weightKg, List<String> secondaryCuisinePreferences, bool noOnionGarlic, List<String> allergies, List<String> dislikes, double? dailyFoodBudgetInr, double? weeklyFoodBudgetInr, int householdSize, int maxPrepTimeMin, String? timezone, int? targetCalories,@JsonKey(fromJson: _doubleFromJson) double? targetProteinG,@JsonKey(fromJson: _doubleFromJson) double? targetCarbsG,@JsonKey(fromJson: _doubleFromJson) double? targetFatG,@JsonKey(fromJson: _doubleFromJson) double? targetFiberG, int? age, DateTime? createdAt, DateTime? updatedAt
+ String dateOfBirth, String sex, int heightCm, String activityLevel, String goal, String primaryCuisineRegion, String spiceTolerance, String dietPattern, String cookingFrequency, String skillLevel,@JsonKey(fromJson: _doubleFromJsonRequired) double weightKg, List<String> secondaryCuisinePreferences, bool noOnionGarlic, List<String> allergies, List<String> dislikes,@JsonKey(fromJson: _doubleFromJson) double? dailyFoodBudgetInr,@JsonKey(fromJson: _doubleFromJson) double? weeklyFoodBudgetInr, int householdSize, int maxPrepTimeMin, String? timezone, int? targetCalories,@JsonKey(fromJson: _doubleFromJson) double? targetProteinG,@JsonKey(fromJson: _doubleFromJson) double? targetCarbsG,@JsonKey(fromJson: _doubleFromJson) double? targetFatG,@JsonKey(fromJson: _doubleFromJson) double? targetFiberG, int? age, DateTime? createdAt, DateTime? updatedAt
 });
 
 

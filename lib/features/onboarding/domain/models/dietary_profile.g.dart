@@ -19,7 +19,9 @@ _DietaryProfile _$DietaryProfileFromJson(
   dietPattern: json['diet_pattern'] as String,
   cookingFrequency: json['cooking_frequency'] as String,
   skillLevel: json['skill_level'] as String,
-  weightKg: _doubleFromJsonRequired(json['weight_kg']),
+  weightKg: json['weight_kg'] == null
+      ? 0.0
+      : _doubleFromJsonRequired(json['weight_kg']),
   secondaryCuisinePreferences:
       (json['secondary_cuisine_preferences'] as List<dynamic>?)
           ?.map((e) => e as String)

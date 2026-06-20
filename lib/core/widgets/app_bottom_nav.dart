@@ -55,14 +55,14 @@ class AppBottomNav extends StatelessWidget {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.menu_book_outlined),
-          activeIcon: Icon(Icons.menu_book_rounded),
-          label: 'Recipes',
+          icon: Icon(Icons.calendar_view_week_outlined),
+          activeIcon: Icon(Icons.calendar_view_week_rounded),
+          label: 'Week',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.track_changes_outlined),
-          activeIcon: Icon(Icons.track_changes_rounded),
-          label: 'Tracker',
+          icon: Icon(Icons.chat_bubble_outline_rounded),
+          activeIcon: Icon(Icons.chat_bubble_rounded),
+          label: 'Chat',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline_rounded),

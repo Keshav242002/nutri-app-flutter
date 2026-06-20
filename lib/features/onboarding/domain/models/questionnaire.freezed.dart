@@ -562,8 +562,8 @@ as List<QuestionnaireField>,
 /// @nodoc
 mixin _$QuestionnaireField {
 
- String get name; String get label; String get type;// ignore: invalid_annotation_target
-@JsonKey(name: 'required') bool get isRequired; List<FieldOption>? get options; Map<String, dynamic>? get constraints; String? get hint; String? get group;// ignore: invalid_annotation_target
+ String get name; String get label; String get type;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
+@JsonKey(name: 'required') bool get isRequired; List<FieldOption>? get options; Map<String, dynamic>? get constraints; String? get hint; String? get group;// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @JsonKey(name: 'group_constraint') String? get groupConstraint;
 /// Create a copy of QuestionnaireField
 /// with the given fields replaced by the non-null parameter values.
@@ -772,7 +772,7 @@ class _QuestionnaireField implements QuestionnaireField {
 @override final  String name;
 @override final  String label;
 @override final  String type;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(name: 'required') final  bool isRequired;
  final  List<FieldOption>? _options;
 @override List<FieldOption>? get options {
@@ -794,7 +794,7 @@ class _QuestionnaireField implements QuestionnaireField {
 
 @override final  String? hint;
 @override final  String? group;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — freezed requires @JsonKey on factory params
 @override@JsonKey(name: 'group_constraint') final  String? groupConstraint;
 
 /// Create a copy of QuestionnaireField

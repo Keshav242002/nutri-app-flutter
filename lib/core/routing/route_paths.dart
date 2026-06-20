@@ -29,4 +29,7 @@ abstract final class RoutePaths {
 
   /// F2 computed-targets summary after onboarding submit.
   static const yourPlan = '/your-plan';
+
+  /// Recipe detail screen — sub-route of home branch.
+  static const recipeDetail = '/home/recipe/:slug';
 }

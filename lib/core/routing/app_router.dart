@@ -6,7 +6,8 @@ import 'package:ahara/features/auth/presentation/controllers/auth_controller.dar
 import 'package:ahara/features/auth/presentation/screens/login_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/onboarding_slides_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
-import 'package:ahara/features/home/presentation/screens/home_screen.dart';
+import 'package:ahara/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:ahara/features/dashboard/presentation/screens/recipe_detail_screen.dart';
 import 'package:ahara/features/onboarding/domain/models/dietary_profile.dart';
 import 'package:ahara/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:ahara/features/onboarding/presentation/screens/your_plan_screen.dart';
@@ -109,10 +110,11 @@ class _AuthNotifier extends ChangeNotifier {
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
   final notifier = _AuthNotifier(ref.read(authControllerProvider));
-  ref.listen<AsyncValue<AuthState>>(authControllerProvider, (_, next) {
-    notifier.update(next);
-  });
-  ref.onDispose(notifier.dispose);
+  ref
+    ..listen<AsyncValue<AuthState>>(authControllerProvider, (_, next) {
+      notifier.update(next);
+    })
+    ..onDispose(notifier.dispose);
 
   return GoRouter(
     initialLocation: RoutePaths.splash,
@@ -160,7 +162,16 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.home,
-                pageBuilder: (_, __) => _fadePage(const HomeScreen()),
+                pageBuilder: (_, __) => _fadePage(const DashboardScreen()),
+                routes: [
+                  GoRoute(
+                    path: 'recipe/:slug',
+                    pageBuilder: (_, state) {
+                      final slug = state.pathParameters['slug']!;
+                      return _fadePage(RecipeDetailScreen(slug: slug));
+                    },
+                  ),
+                ],
               ),
             ],
           ),

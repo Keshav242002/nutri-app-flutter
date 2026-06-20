@@ -46,7 +46,7 @@ final class OnboardingControllerProvider
 }
 
 String _$onboardingControllerHash() =>
-    r'417476dc97ce9eb49f448d93b681d916c1fa1061';
+    r'b8ca946e5c070297315547c1366fcef82dc689e5';
 
 /// Manages the 6-step onboarding form state.
 ///
