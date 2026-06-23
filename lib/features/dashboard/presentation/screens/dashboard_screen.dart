@@ -9,17 +9,18 @@ import 'package:ahara/core/widgets/loading_state.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
 import 'package:ahara/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ahara/features/dashboard/domain/models/daily_nutrition.dart';
 import 'package:ahara/features/dashboard/domain/models/meal_card_state.dart';
 import 'package:ahara/features/dashboard/domain/models/recipe_slim.dart';
 import 'package:ahara/features/dashboard/presentation/controllers/dashboard_controller.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/ambient_calorie_viz.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/custom_meal_sheet.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/dashboard_meal_card.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/greeting_card.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/log_chooser_sheet.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/mark_as_eaten_sheet.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/meal_options_sheet.dart';
-import 'package:ahara/features/dashboard/presentation/widgets/swap_sheet.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/ambient_calorie_viz.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/custom_meal_sheet.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/dashboard_meal_card.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/greeting_card.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/log_chooser_sheet.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/mark_as_eaten_sheet.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/meal_options_sheet.dart';
+import 'package:ahara/features/dashboard/presentation/widgets/dashboard/swap_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,7 @@ class DashboardScreen extends ConsumerWidget {
               ? e
               : UnknownException(message: e.toString()),
           onRetry: () =>
-              ref.invalidate(dashboardControllerProvider),
+              ref.refresh(dashboardControllerProvider),
         ),
         data: (s) => _DashboardBody(state: s),
       ),
@@ -71,9 +72,13 @@ class _DashboardBody extends ConsumerWidget {
     final firstName = _firstName(user?.displayName ?? '');
     final now = DateTime.now();
 
-    return CustomScrollView(
-      slivers: [
-        _AppBar(firstName: firstName, user: user),
+    return RefreshIndicator(
+      color: AppColors.navyDeep,
+      onRefresh: () => ref.refresh(dashboardControllerProvider.future),
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          _AppBar(firstName: firstName, user: user),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenHorizontal,
@@ -90,21 +95,21 @@ class _DashboardBody extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               AmbientCalorieViz(nutrition: state.nutrition),
               const SizedBox(height: AppSpacing.lg),
-              if (_showNudge(now, state)) ...[
+              if (_dayComplete(state)) ...[
+                _DayCompleteBar(nutrition: state.nutrition),
+                const SizedBox(height: AppSpacing.md),
+              ] else if (_showNudge(now, state)) ...[
                 _NudgeBar(hour: now.hour, state: state),
                 const SizedBox(height: AppSpacing.md),
               ],
-              _SectionHeader(
-                onTune: () => ref
-                    .read(toastProvider.notifier)
-                    .show('Filters coming soon'),
-              ),
+              const _SectionHeader(),
               const SizedBox(height: AppSpacing.md),
               _MealCardList(state: state),
             ]),
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -118,6 +123,15 @@ class _DashboardBody extends ConsumerWidget {
     final lunchPlanned = state.lunchState is PlannedMealCard;
     final dinnerPlanned = state.dinnerState is PlannedMealCard;
     return (hour > 13 && lunchPlanned) || (hour >= 18 && dinnerPlanned);
+  }
+
+  /// True once every slot is resolved (eaten/logged/skipped, none still
+  /// planned) and a calorie target exists — gates the end-of-day summary.
+  static bool _dayComplete(DashboardState state) {
+    final allResolved = state.breakfastState is! PlannedMealCard &&
+        state.lunchState is! PlannedMealCard &&
+        state.dinnerState is! PlannedMealCard;
+    return allResolved && state.nutrition.targets.calories > 0;
   }
 }
 
@@ -223,33 +237,83 @@ class _NudgeBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// Day-complete summary bar
+// ---------------------------------------------------------------------------
+
+/// End-of-day calorie summary shown once every slot is resolved.
+///
+/// Compares consumed vs target calories with a ±10% tolerance band:
+/// within the band reads as "on target", otherwise surfaces the exact
+/// kcal over or under.
+class _DayCompleteBar extends StatelessWidget {
+  const _DayCompleteBar({required this.nutrition});
+
+  final DailyNutrition nutrition;
+
+  @override
+  Widget build(BuildContext context) {
+    final target = nutrition.targets.calories;
+    final consumed = nutrition.totals.calories;
+    final diff = consumed - target;
+    final band = target * 0.10;
+
+    final (IconData icon, Color bg, Color fg, String msg) = switch (diff) {
+      _ when diff.abs() <= band => (
+        Icons.check_circle_rounded,
+        AppColors.successLight,
+        AppColors.success,
+        'Right on target — nicely balanced today.',
+      ),
+      _ when diff > 0 => (
+        Icons.local_fire_department_rounded,
+        AppColors.turmericDim,
+        AppColors.navyDeep,
+        "You're ${diff.round()} kcal over today's target.",
+      ),
+      _ => (
+        Icons.trending_down_rounded,
+        AppColors.navySubtle,
+        AppColors.navyDeep,
+        "You're ${diff.abs().round()} kcal under today's target.",
+      ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: fg),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              msg,
+              style: AppTypography.bodyMedium.copyWith(color: fg),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Section header
 // ---------------------------------------------------------------------------
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.onTune});
-
-  final VoidCallback onTune;
+  const _SectionHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Today's Canvas",
-          style: AppTypography.headingMedium.copyWith(
-            color: AppColors.navyDeep,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(
-            Icons.tune_rounded,
-            color: AppColors.textSecondary,
-          ),
-          onPressed: onTune,
-        ),
-      ],
+    return Text(
+      "Today's Canvas",
+      style: AppTypography.headingMedium.copyWith(
+        color: AppColors.navyDeep,
+      ),
     );
   }
 }
@@ -268,8 +332,6 @@ class _MealCardList extends ConsumerStatefulWidget {
 }
 
 class _MealCardListState extends ConsumerState<_MealCardList> {
-  // Swap loading state per slot.
-  final Map<MealSlot, bool> _swapping = {};
 
   MealSlot? _currentSlot() {
     final h = DateTime.now().hour;
@@ -316,7 +378,7 @@ class _MealCardListState extends ConsumerState<_MealCardList> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => MealOptionsSheet(
+      builder: (_) => MealOptionsSheet.planned(
         recipe: recipe,
         slot: slot,
         onSwap: () => _onSwap(slot),
@@ -328,24 +390,39 @@ class _MealCardListState extends ConsumerState<_MealCardList> {
     );
   }
 
-  Future<void> _onSwap(MealSlot slot) async {
-    setState(() => _swapping[slot] = true);
-    // Show the swap sheet in loading state.
-    await showModalBottomSheet<void>(
+  /// Opens the edit sheet for a skipped meal — lets the user un-skip by
+  /// marking eaten, logging something else, or swapping.
+  void _onEditSkipped(MealSlot slot) {
+    final recipe = _plannedRecipe(slot);
+    if (recipe == null) return;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MealOptionsSheet.skipped(
+        recipe: recipe,
+        slot: slot,
+        onMarkEaten: () => _onMarkEaten(slot),
+        onLogElse: () => _onLogElse(slot),
+        onSwap: () => _onSwap(slot),
+      ),
+    );
+  }
+
+  void _onSwap(MealSlot slot) {
+    final notifier = ref.read(dashboardControllerProvider.notifier);
+    // The sheet fires the API on open, shows a shimmer while in flight, then a
+    // confirmation. The swap is committed to the plan only when the sheet is
+    // dismissed (manually or via the 2s auto-close).
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SwapSheet(
-        isLoading: true,
-        onAccept: () {},
-        onKeep: () => Navigator.of(context).pop(),
+        onLoad: () => notifier.fetchSwap(slot),
+        onApply: (recipe) => notifier.applySwap(slot, recipe),
       ),
     );
-    if (!mounted) return;
-    await ref
-        .read(dashboardControllerProvider.notifier)
-        .swapMeal(slot);
-    setState(() => _swapping.remove(slot));
   }
 
   void _onLogElse(MealSlot slot) {
@@ -399,7 +476,7 @@ class _MealCardListState extends ConsumerState<_MealCardList> {
             onMarkEaten: () => _onMarkEaten(slot),
             onOptions: () => _onOptions(slot),
             onTap: () => _onTap(slot),
-            onLogInstead: () => _onLogElse(slot),
+            onEdit: () => _onEditSkipped(slot),
           ),
         );
       }).toList(),

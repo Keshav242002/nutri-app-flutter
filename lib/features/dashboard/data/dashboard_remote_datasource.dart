@@ -73,7 +73,13 @@ class DashboardRemoteDataSource {
       'POST /mealplans/regenerate-slot/ → ${response.data}',
       name: 'API',
     );
-    return EnvelopeParser.parseSuccess(response.data!, RecipeSlim.fromJson);
+    // The endpoint returns the full updated meal plan, not a bare recipe.
+    // Pull the regenerated slot's recipe out of the plan envelope.
+    return EnvelopeParser.parseSuccess(
+      response.data!,
+      (Map<String, dynamic> plan) =>
+          RecipeSlim.fromJson(plan[slot] as Map<String, dynamic>),
+    );
   }
 
   /// Calls `GET /api/v1/recipes/:slug/`.

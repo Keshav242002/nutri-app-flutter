@@ -1,5 +1,6 @@
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/providers/toast_provider.dart';
+import 'package:ahara/core/providers/tracker_sync_provider.dart';
 import 'package:ahara/core/utils/result.dart';
 import 'package:ahara/features/dashboard/domain/models/daily_nutrition.dart';
 import 'package:ahara/features/dashboard/domain/models/log_meal_request.dart';
@@ -31,11 +32,15 @@ abstract class DashboardState with _$DashboardState {
 ///
 /// Fetches meal plan, nutrition, and today's logs in parallel on build.
 /// Exposes action methods that call the repository and update card states.
-@riverpod
+@Riverpod(keepAlive: true)
 class DashboardController extends _$DashboardController {
   @override
   Future<DashboardState> build() async {
-    final repo = ref.watch(dashboardRepositoryProvider);
+    // A meal logged on any screen (e.g. the week tab) bumps this revision;
+    // refetch nutrition + today's logs so the orbit and meal cards stay live.
+    ref.listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision());
+
+    final repo = ref.read(dashboardRepositoryProvider);
     final today = _today();
 
     // Parallel fetch with typed futures.
@@ -109,7 +114,7 @@ class DashboardController extends _$DashboardController {
             servingsEaten: servings,
           ),
         );
-        _refreshNutritionSilently();
+        ref.read(trackerLogRevisionProvider.notifier).bump();
       },
       failure: (AppException e) => _showError(e.message),
     );
@@ -143,7 +148,7 @@ class DashboardController extends _$DashboardController {
             slot: slot,
           ),
         );
-        _refreshNutritionSilently();
+        ref.read(trackerLogRevisionProvider.notifier).bump();
       },
       failure: (AppException e) => _showError(e.message),
     );
@@ -184,7 +189,7 @@ class DashboardController extends _$DashboardController {
             slot: slot,
           ),
         );
-        _refreshNutritionSilently();
+        ref.read(trackerLogRevisionProvider.notifier).bump();
       },
       failure: (AppException e) => _showError(e.message),
     );
@@ -204,34 +209,45 @@ class DashboardController extends _$DashboardController {
     );
     final result = await ref.read(dashboardRepositoryProvider).logMeal(req);
     result.when(
-      success: (MealLog _) =>
-          _updateCard(slot, MealCardState.skipped(recipe: recipe!, slot: slot)),
+      success: (MealLog _) {
+        _updateCard(slot, MealCardState.skipped(recipe: recipe!, slot: slot));
+        ref.read(trackerLogRevisionProvider.notifier).bump();
+      },
       failure: (AppException e) => _showError(e.message),
     );
   }
 
-  /// Requests a new recipe for [slot] and updates the meal plan.
-  Future<void> swapMeal(MealSlot slot) async {
-    final s = state.value;
-    if (s == null) return;
-
+  /// Requests a new recipe for [slot] WITHOUT committing it to the plan.
+  ///
+  /// Returns the regenerated recipe, or `null` on failure (an error toast is
+  /// shown). The caller commits the result via [applySwap] once the user
+  /// dismisses the confirmation.
+  Future<RecipeSlim?> fetchSwap(MealSlot slot) async {
     final result = await ref
         .read(dashboardRepositoryProvider)
         .regenerateSlot(_today(), slot.name);
-    result.when(
-      success: (RecipeSlim newRecipe) {
-        final updated = s.copyWith(
-          mealPlan: _replacePlanSlot(s.mealPlan, slot, newRecipe),
-        );
-        state = AsyncData(
-          _applyCard(
-            updated,
-            slot,
-            MealCardState.planned(recipe: newRecipe, slot: slot),
-          ),
-        );
+    return result.when(
+      success: (RecipeSlim newRecipe) => newRecipe,
+      failure: (AppException e) {
+        _showError(e.message);
+        return null;
       },
-      failure: (AppException e) => _showError(e.message),
+    );
+  }
+
+  /// Commits a previously-fetched [newRecipe] to [slot]'s plan and card.
+  void applySwap(MealSlot slot, RecipeSlim newRecipe) {
+    final s = state.value;
+    if (s == null) return;
+    final updated = s.copyWith(
+      mealPlan: _replacePlanSlot(s.mealPlan, slot, newRecipe),
+    );
+    state = AsyncData(
+      _applyCard(
+        updated,
+        slot,
+        MealCardState.planned(recipe: newRecipe, slot: slot),
+      ),
     );
   }
 
@@ -257,17 +273,51 @@ class DashboardController extends _$DashboardController {
     };
   }
 
-  Future<void> _refreshNutritionSilently() async {
+  /// Silently refetches today's nutrition AND logs, then merges them into the
+  /// current state. Triggered both by this screen's own log actions and by
+  /// logs made elsewhere (via [trackerLogRevisionProvider]). Preserves the
+  /// existing meal plan; only nutrition and the three card states are updated.
+  Future<void> _syncFromRevision() async {
     final s = state.value;
     if (s == null) return;
-    final result = await ref
-        .read(dashboardRepositoryProvider)
-        .getDailyNutrition(_today());
-    result.when(
-      success: (DailyNutrition nutrition) =>
-          state = AsyncData(s.copyWith(nutrition: nutrition)),
+    final repo = ref.read(dashboardRepositoryProvider);
+    final today = _today();
+
+    late Result<DailyNutrition> nutritionResult;
+    late Result<List<MealLog>> logsResult;
+    await Future.wait<void>([
+      repo
+          .getDailyNutrition(today)
+          .then((Result<DailyNutrition> r) => nutritionResult = r),
+      repo
+          .getTodayLogs(today)
+          .then((Result<List<MealLog>> r) => logsResult = r),
+    ]);
+
+    final cur = state.value;
+    if (cur == null) return;
+
+    final nutrition = nutritionResult.when(
+      success: (DailyNutrition d) => d,
+      failure: (AppException _) => cur.nutrition,
+    );
+
+    var updated = cur.copyWith(nutrition: nutrition);
+    logsResult.when(
+      success: (List<MealLog> logs) {
+        updated = updated.copyWith(
+          breakfastState: _cardFromLog(
+            logs,
+            MealSlot.breakfast,
+            cur.mealPlan.breakfast,
+          ),
+          lunchState: _cardFromLog(logs, MealSlot.lunch, cur.mealPlan.lunch),
+          dinnerState: _cardFromLog(logs, MealSlot.dinner, cur.mealPlan.dinner),
+        );
+      },
       failure: (AppException _) {},
     );
+    state = AsyncData(updated);
   }
 
   void _showError(String message) =>

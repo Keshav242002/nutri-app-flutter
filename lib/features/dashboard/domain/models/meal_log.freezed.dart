@@ -287,10 +287,10 @@ as int,
 /// @nodoc
 mixin _$MealLog {
 
- int get id; String get logDate; String get slot; MealLogStatus get status;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromString) double? get servingsEaten; String? get customDescription; int? get customCalories;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromString) double? get customProteinG;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _doubleFromString) double? get customCarbsG;// ignore: invalid_annotation_target
+ int get id; String get logDate; String get slot; MealLogStatus get status;// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
+@JsonKey(fromJson: _doubleFromString) double? get servingsEaten; String? get customDescription; int? get customCalories;// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
+@JsonKey(fromJson: _doubleFromString) double? get customProteinG;// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
+@JsonKey(fromJson: _doubleFromString) double? get customCarbsG;// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
 @JsonKey(fromJson: _doubleFromString) double? get customFatG; String? get notes; MealLogRecipeRef? get plannedRecipe; MealLogRecipeRef? get actualRecipe;
 /// Create a copy of MealLog
 /// with the given fields replaced by the non-null parameter values.
@@ -528,15 +528,15 @@ class _MealLog implements MealLog {
 @override final  String logDate;
 @override final  String slot;
 @override final  MealLogStatus status;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
 @override@JsonKey(fromJson: _doubleFromString) final  double? servingsEaten;
 @override final  String? customDescription;
 @override final  int? customCalories;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
 @override@JsonKey(fromJson: _doubleFromString) final  double? customProteinG;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
 @override@JsonKey(fromJson: _doubleFromString) final  double? customCarbsG;
-// ignore: invalid_annotation_target
+// ignore: invalid_annotation_target — @JsonKey on factory param, freezed limitation
 @override@JsonKey(fromJson: _doubleFromString) final  double? customFatG;
 @override final  String? notes;
 @override final  MealLogRecipeRef? plannedRecipe;

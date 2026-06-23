@@ -32,7 +32,7 @@ final class DashboardControllerProvider
         argument: null,
         retry: null,
         name: r'dashboardControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -46,7 +46,7 @@ final class DashboardControllerProvider
 }
 
 String _$dashboardControllerHash() =>
-    r'c01e05ad51e9ad33594739d6f044a1edaefc1129';
+    r'6ee743f49108de88f9f57b97510d58a7c5fd67b2';
 
 /// Manages the dashboard screen state.
 ///

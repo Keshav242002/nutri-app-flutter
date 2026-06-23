@@ -25,6 +25,26 @@ abstract class RecipeSlim with _$RecipeSlim {
   }) = _RecipeSlim;
 
   /// Deserialises from JSON.
-  factory RecipeSlim.fromJson(Map<String, dynamic> json) =>
-      _$RecipeSlimFromJson(json);
+  ///
+  /// Calories are extracted from the nested `cached_nutrition_summary` object
+  /// that the API returns — the flat `cached_calories_per_serving` field does
+  /// not exist on the mealplan endpoint.
+  factory RecipeSlim.fromJson(Map<String, dynamic> json) {
+    final nutrition =
+        json['cached_nutrition_summary'] as Map<String, dynamic>?;
+    return RecipeSlim(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      name: json['name'] as String,
+      slug: json['slug'] as String,
+      mealType: json['meal_type'] as String,
+      cuisine: json['cuisine'] as String,
+      prepTimeMin: (json['prep_time_min'] as num).toInt(),
+      cachedCaloriesPerServing:
+          (nutrition?['calories'] as num?)?.toInt() ??
+          (json['cached_calories_per_serving'] as num?)?.toInt() ??
+          0,
+      imageUrl: json['image_url'] as String?,
+      proteinSource: json['protein_source'] as String?,
+    );
+  }
 }

@@ -11,6 +11,7 @@ import 'package:ahara/features/dashboard/presentation/screens/recipe_detail_scre
 import 'package:ahara/features/onboarding/domain/models/dietary_profile.dart';
 import 'package:ahara/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:ahara/features/onboarding/presentation/screens/your_plan_screen.dart';
+import 'package:ahara/features/week/presentation/screens/week_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -179,8 +180,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.recipes,
-                pageBuilder: (_, __) =>
-                    _fadePage(const _PlaceholderScreen(label: 'Recipes')),
+                pageBuilder: (_, __) => _fadePage(const WeekScreen()),
               ),
             ],
           ),

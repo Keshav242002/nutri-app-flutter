@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -39,6 +40,7 @@ class ToastNotifier extends _$ToastNotifier {
   void show(String message, {ToastType type = ToastType.error}) {
     _timer?.cancel();
     state = ToastMessage(message: message, type: type);
+    if (type == ToastType.error) dev.log(message, name: 'Toast');
     _timer = Timer(const Duration(seconds: 2), dismiss);
   }
 
