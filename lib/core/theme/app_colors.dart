@@ -30,6 +30,9 @@ abstract final class AppColors {
   /// Turmeric at 32% opacity — completed progress pills, soft tints.
   static const Color turmericDim = Color(0x52F5A623);
 
+  /// Deep amber — active section pills, strong amber accents on light bg.
+  static const Color amberDeep = Color(0xFF835500);
+
   // --- Warm Cream ---
 
   /// Page background — the canvas everything sits on.

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_typography.dart';
@@ -7,8 +8,10 @@ import 'package:flutter/material.dart';
 
 /// Ambient calorie visualisation — pulsing blobs + orbiting macro dots.
 ///
-/// Shows remaining kcal in the centre with three orbiting dots for
-/// protein, carbs, and fat sourced from [DailyNutrition.totals].
+/// Shows calories eaten over the daily target in the centre, with three dots
+/// for protein, carbs, and fat (from [DailyNutrition.totals]) orbiting in
+/// unison. The dots share a single rotation so they keep a fixed 120° spacing
+/// and never cross or overlap each other.
 class AmbientCalorieViz extends StatefulWidget {
   /// Creates an [AmbientCalorieViz].
   const AmbientCalorieViz({required this.nutrition, super.key});
@@ -24,9 +27,7 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
     with TickerProviderStateMixin {
   late final AnimationController _blob1;
   late final AnimationController _blob2;
-  late final AnimationController _orbitP; // Protein — 15s
-  late final AnimationController _orbitC; // Carbs — 20s
-  late final AnimationController _orbitF; // Fat — 18s
+  late final AnimationController _orbit; // Shared by all three macro dots.
 
   @override
   void initState() {
@@ -46,19 +47,11 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
         if (status == AnimationStatus.dismissed) _blob2.forward();
       });
 
-    _orbitP = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 15),
-    )..repeat();
-
-    _orbitC = AnimationController(
+    // A single controller drives all three dots so their relative 120°
+    // spacing is constant — they orbit together and never collide.
+    _orbit = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 20),
-    )..repeat();
-
-    _orbitF = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 18),
     )..repeat();
   }
 
@@ -66,45 +59,65 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
   void dispose() {
     _blob1.dispose();
     _blob2.dispose();
-    _orbitP.dispose();
-    _orbitC.dispose();
-    _orbitF.dispose();
+    _orbit.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final remaining =
-        (widget.nutrition.targets.calories - widget.nutrition.totals.calories)
-            .round()
-            .clamp(0, 9999);
+    final eaten = widget.nutrition.totals.calories.round();
+    final target = widget.nutrition.targets.calories.round();
 
     return SizedBox(
       height: 260,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          _Blob(controller: _blob1, color: AppColors.turmeric, size: 180),
-          Positioned(
-            left: 60,
-            child: _Blob(
-              controller: _blob2,
-              color: AppColors.macroFiber,
-              size: 150,
-            ),
+          // Two concentric amber blobs, heavily blurred — together they read
+          // as one soft ambient glow (matches docs/design/home.md: both
+          // bg-secondary-container, inset-0 / inset-4, blur-3xl / blur-2xl).
+          // Sizes + blur kept small enough that the glow's spread (~2.5×sigma)
+          // stays inside the orbit ring (radius 110) and the 260px box — so it
+          // never bleeds onto neighbouring UI or under the orbiting macro dots.
+          _Blob(
+            controller: _blob1,
+            color: AppColors.turmeric,
+            size: 130,
+            alpha: 0.20,
+            blurSigma: 16,
+          ),
+          _Blob(
+            controller: _blob2,
+            color: AppColors.turmeric,
+            size: 95,
+            alpha: 0.30,
+            blurSigma: 12,
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                remaining.toString(),
+                eaten.toString(),
                 style: AppTypography.displayLarge.copyWith(
                   color: AppColors.navyDeep,
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              Container(
+                width: 64,
+                height: 1.5,
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                color: AppColors.textSecondary.withValues(alpha: 0.4),
+              ),
               Text(
-                'KCAL REMAINING',
+                '/ $target',
+                style: AppTypography.headingMedium.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'KCAL',
                 style: AppTypography.caption.copyWith(
                   color: AppColors.textSecondary,
                   letterSpacing: 1.2,
@@ -113,7 +126,7 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
             ],
           ),
           _OrbitDot(
-            controller: _orbitP,
+            controller: _orbit,
             label: 'P',
             value: widget.nutrition.totals.proteinG.round(),
             color: AppColors.macroProtein,
@@ -121,7 +134,7 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
             startAngle: 0,
           ),
           _OrbitDot(
-            controller: _orbitC,
+            controller: _orbit,
             label: 'C',
             value: widget.nutrition.totals.carbsG.round(),
             color: AppColors.macroCarbs,
@@ -129,7 +142,7 @@ class _AmbientCalorieVizState extends State<AmbientCalorieViz>
             startAngle: 2 * math.pi / 3,
           ),
           _OrbitDot(
-            controller: _orbitF,
+            controller: _orbit,
             label: 'F',
             value: widget.nutrition.totals.fatG.round(),
             color: AppColors.macroFat,
@@ -151,24 +164,31 @@ class _Blob extends StatelessWidget {
     required this.controller,
     required this.color,
     required this.size,
+    required this.alpha,
+    required this.blurSigma,
   });
 
   final AnimationController controller;
   final Color color;
   final double size;
+  final double alpha;
+  final double blurSigma;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (_, __) => Transform.scale(
-        scale: 0.95 + controller.value * 0.1,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color.withValues(alpha: 0.12),
+    return ImageFiltered(
+      imageFilter: ui.ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (_, __) => Transform.scale(
+          scale: 0.95 + controller.value * 0.1,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: alpha),
+            ),
           ),
         ),
       ),

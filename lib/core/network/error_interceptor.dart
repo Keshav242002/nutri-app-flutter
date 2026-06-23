@@ -1,3 +1,6 @@
+import 'dart:developer' as dev;
+import 'dart:io';
+
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:dio/dio.dart';
 
@@ -10,6 +13,11 @@ class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final exception = _mapException(err);
+    dev.log(
+      '${err.requestOptions.method} ${err.requestOptions.path}'
+      ' → ${exception.runtimeType}: ${exception.message}',
+      name: 'API',
+    );
     handler.reject(
       DioException(
         requestOptions: err.requestOptions,
@@ -28,6 +36,13 @@ class ErrorInterceptor extends Interceptor {
         return const TimeoutException();
 
       case DioExceptionType.connectionError:
+        final inner = err.error;
+        if (inner is SocketException &&
+            inner.message.contains('Connection refused')) {
+          return const ServerException(
+            message: 'Server is unreachable. Try again later.',
+          );
+        }
         return const NetworkException();
 
       case DioExceptionType.badResponse:

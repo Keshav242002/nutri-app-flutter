@@ -8,9 +8,9 @@ part 'providers.g.dart';
 /// Provides the [DashboardRemoteDataSource] backed by [apiClientProvider].
 @riverpod
 DashboardRemoteDataSource dashboardRemoteDataSource(Ref ref) =>
-    DashboardRemoteDataSource(ref.watch(apiClientProvider));
+    DashboardRemoteDataSource(ref.read(apiClientProvider));
 
 /// Provides the [DashboardRepository].
 @riverpod
 DashboardRepository dashboardRepository(Ref ref) =>
-    DashboardRepository(ref.watch(dashboardRemoteDataSourceProvider));
+    DashboardRepository(ref.read(dashboardRemoteDataSourceProvider));

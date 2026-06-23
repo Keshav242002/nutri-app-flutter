@@ -1,7 +1,9 @@
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
 import 'package:ahara/core/theme/app_typography.dart';
+import 'package:ahara/core/utils/formatters.dart';
 import 'package:ahara/features/dashboard/domain/models/meal_card_state.dart';
+import 'package:ahara/features/dashboard/domain/models/recipe_slim.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +16,8 @@ class DashboardMealCard extends StatefulWidget {
     required this.onMarkEaten,
     required this.onOptions,
     required this.onTap,
-    required this.onLogInstead,
+    required this.onEdit,
+    this.interactive = true,
     super.key,
   });
 
@@ -33,8 +36,14 @@ class DashboardMealCard extends StatefulWidget {
   /// Called when the user taps the card body to view recipe detail.
   final VoidCallback onTap;
 
-  /// Called when the user taps "Log instead" on a skipped card.
-  final VoidCallback onLogInstead;
+  /// Called when the user taps "Edit" on a skipped card.
+  final VoidCallback onEdit;
+
+  /// Whether the card shows action controls (Mark eaten / options / Edit).
+  ///
+  /// `false` renders a read-only card — used by the Week tab for past and
+  /// future days, where only today's meals are actionable.
+  final bool interactive;
 
   @override
   State<DashboardMealCard> createState() => _DashboardMealCardState();
@@ -101,9 +110,10 @@ class _DashboardMealCardState extends State<DashboardMealCard>
               _CardBody(
                 cardState: widget.cardState,
                 isCurrentSlot: widget.isCurrentSlot,
+                interactive: widget.interactive,
                 onMarkEaten: widget.onMarkEaten,
                 onOptions: widget.onOptions,
-                onLogInstead: widget.onLogInstead,
+                onEdit: widget.onEdit,
               ),
             ],
           ),
@@ -244,19 +254,23 @@ class _CardBody extends StatelessWidget {
   const _CardBody({
     required this.cardState,
     required this.isCurrentSlot,
+    required this.interactive,
     required this.onMarkEaten,
     required this.onOptions,
-    required this.onLogInstead,
+    required this.onEdit,
   });
 
   final MealCardState cardState;
   final bool isCurrentSlot;
+  final bool interactive;
   final VoidCallback onMarkEaten;
   final VoidCallback onOptions;
-  final VoidCallback onLogInstead;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
+    final recipe = _recipe;
+    final action = _actionRow();
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -270,8 +284,14 @@ class _CardBody extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          _actionRow(context),
+          if (recipe != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _ChipRow(recipe: recipe),
+          ],
+          if (action != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            action,
+          ],
         ],
       ),
     );
@@ -291,32 +311,109 @@ class _CardBody extends StatelessWidget {
         skipped: (recipe, _) => recipe.name,
       );
 
-  Widget _actionRow(BuildContext context) {
+  /// The recipe driving the chip row, or null for a custom-logged meal.
+  RecipeSlim? get _recipe => cardState.when(
+        planned: (recipe, _) => recipe,
+        eaten: (recipe, _, __) => recipe,
+        loggedSubstituted: (recipe, _) => recipe,
+        loggedCustom: (_, __, ___) => null,
+        skipped: (recipe, _) => recipe,
+      );
+
+  /// The action row, or null when there's nothing to show (read-only states).
+  Widget? _actionRow() {
     return cardState.when(
-      planned: (_, __) => Row(
-        children: [
-          Expanded(
-            child: _ActionButton(
-              label: 'Mark as eaten',
-              onTap: onMarkEaten,
-              primary: true,
-            ),
-          ),
-          const SizedBox(width: 8),
-          _OptionsButton(onTap: onOptions),
-        ],
-      ),
+      planned: (_, __) => interactive
+          ? Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    label: 'Mark as eaten',
+                    onTap: onMarkEaten,
+                    primary: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _OptionsButton(onTap: onOptions),
+              ],
+            )
+          : null,
       eaten: (_, __, double servings) => Row(
         children: [
           _InfoChip(label: _servingsLabel(servings)),
-          const Spacer(),
-          _TextLink(label: 'Edit', onTap: onMarkEaten),
+          if (interactive) ...[
+            const Spacer(),
+            _TextLink(label: 'Edit', onTap: onMarkEaten),
+          ],
         ],
       ),
-      loggedSubstituted: (_, __) =>
-          const _InfoChip(label: 'Substituted'),
+      loggedSubstituted: (_, __) => const _InfoChip(label: 'Substituted'),
       loggedCustom: (_, __, ___) => const _InfoChip(label: 'Custom meal'),
-      skipped: (_, __) => _TextLink(label: 'Log instead', onTap: onLogInstead),
+      skipped: (_, __) =>
+          interactive ? _TextLink(label: 'Edit', onTap: onEdit) : null,
+    );
+  }
+}
+
+/// Meta chips below the title — cuisine, prep time, protein source.
+class _ChipRow extends StatelessWidget {
+  const _ChipRow({required this.recipe});
+
+  final RecipeSlim recipe;
+
+  @override
+  Widget build(BuildContext context) {
+    final protein = recipe.proteinSource;
+    final chips = <Widget>[
+      if (recipe.cuisine.isNotEmpty)
+        _MetaChip(label: formatTag(recipe.cuisine)),
+      if (recipe.prepTimeMin > 0)
+        _MetaChip(
+          label: '${recipe.prepTimeMin} min',
+          icon: Icons.schedule_rounded,
+        ),
+      if (protein != null && protein.isNotEmpty && protein != 'none')
+        _MetaChip(label: formatTag(protein)),
+    ];
+    if (chips.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      children: chips,
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.label, this.icon});
+
+  final String label;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppColors.creamDeep,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

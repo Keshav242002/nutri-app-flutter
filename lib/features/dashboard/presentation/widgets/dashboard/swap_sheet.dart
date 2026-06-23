@@ -1,41 +1,77 @@
+import 'dart:async';
+
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
 import 'package:ahara/core/theme/app_typography.dart';
-import 'package:ahara/core/widgets/app_button.dart';
 import 'package:ahara/core/widgets/app_modal_sheet.dart';
 import 'package:ahara/features/dashboard/domain/models/recipe_slim.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-/// Sheet shown while regenerating a meal slot — loading shimmer → result.
-class SwapSheet extends StatelessWidget {
+/// Sheet shown while regenerating a meal slot.
+///
+/// Fires the swap request on open (loading shimmer), then shows a confirmation
+/// once the new recipe arrives. The swap is committed via [onApply] when the
+/// sheet is dismissed — either manually or by the 2-second auto-close.
+class SwapSheet extends StatefulWidget {
   /// Creates a [SwapSheet].
   const SwapSheet({
-    required this.isLoading,
-    required this.onAccept,
-    required this.onKeep,
+    required this.onLoad,
+    required this.onApply,
     super.key,
-    this.swapResult,
-    this.swapLimitReached = false,
   });
 
-  /// Whether a swap request is in flight.
-  final bool isLoading;
+  /// Fires the regenerate-slot request. Returns the new recipe, or `null` on
+  /// failure (the controller is responsible for surfacing the error).
+  final Future<RecipeSlim?> Function() onLoad;
 
-  /// The new recipe returned by regenerate-slot, if available.
-  final RecipeSlim? swapResult;
+  /// Commits the swapped recipe once the user dismisses the confirmation.
+  final void Function(RecipeSlim recipe) onApply;
 
-  /// Whether the swap rate limit was exceeded.
-  final bool swapLimitReached;
+  @override
+  State<SwapSheet> createState() => _SwapSheetState();
+}
 
-  /// Called when the user accepts the new recipe.
-  final VoidCallback onAccept;
+class _SwapSheetState extends State<SwapSheet> {
+  RecipeSlim? _result;
+  bool _applied = false;
+  Timer? _autoClose;
 
-  /// Called when the user wants to keep the original recipe.
-  final VoidCallback onKeep;
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final recipe = await widget.onLoad();
+    if (!mounted) return;
+    if (recipe == null) {
+      // Failure — the controller already showed an error toast. Just close.
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _result = recipe);
+    _autoClose = Timer(const Duration(seconds: 2), () {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoClose?.cancel();
+    // Commit on any dismissal (manual or auto-close), exactly once.
+    final recipe = _result;
+    if (recipe != null && !_applied) {
+      _applied = true;
+      widget.onApply(recipe);
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final result = _result;
     return AppModalSheet(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -48,54 +84,31 @@ class SwapSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (swapLimitReached) ...[
-            _RateLimitMessage(),
-            const SizedBox(height: AppSpacing.md),
-            _KeepButton(onKeep: onKeep),
-          ] else if (isLoading) ...[
+          if (result == null) ...[
             _Shimmer(),
             const SizedBox(height: AppSpacing.md),
-          ] else if (swapResult != null) ...[
-            _RecipeMiniCard(recipe: swapResult!),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(label: 'Accept swap', onPressed: onAccept),
-            const SizedBox(height: AppSpacing.sm),
-            _KeepButton(onKeep: onKeep),
           ] else ...[
-            _Shimmer(),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RateLimitMessage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.errorLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: AppColors.error,
-            size: 20,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              "You've used your swaps for this slot "
-              'this week — back next week!',
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.error,
-              ),
+            _RecipeMiniCard(recipe: result),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.success,
+                  size: 20,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Meal swapped!',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.navyDeep,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -235,26 +248,6 @@ class _RecipeMiniCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _KeepButton extends StatelessWidget {
-  const _KeepButton({required this.onKeep});
-  final VoidCallback onKeep;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onKeep,
-      child: Center(
-        child: Text(
-          'Keep original',
-          style: AppTypography.labelMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
       ),
     );
   }
