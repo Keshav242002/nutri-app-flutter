@@ -44,7 +44,7 @@ Future<SplashResult> splashController(Ref ref) async {
     success: (User user) => user.hasProfile
         ? SplashResult.goToHome
         : SplashResult.goToOnboardingQuestionnaire,
-    failure: (AppException _) => SplashResult.goToLogin,
+    failure: (AppException e) => SplashResult.goToLogin,
   );
 }
 

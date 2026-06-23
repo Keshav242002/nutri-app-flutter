@@ -1,3 +1,6 @@
+import 'dart:developer' as dev;
+
+import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/features/auth/data/auth_repository.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
@@ -15,9 +18,9 @@ part 'auth_controller.g.dart';
 class AuthController extends _$AuthController {
   @override
   Future<AuthState> build() async {
-    final user = await fb.FirebaseAuth.instance.authStateChanges().first;
-    if (user == null) return const AuthState.unauthenticated();
-    return _loadUser(ref.read(authRepositoryProvider));
+    final fbUser = await fb.FirebaseAuth.instance.authStateChanges().first;
+    if (fbUser == null) return const AuthState.unauthenticated();
+    return _loadUser(ref.read(authRepositoryProvider), fbUser);
   }
 
   /// Refreshes user from the backend and updates state.
@@ -29,7 +32,9 @@ class AuthController extends _$AuthController {
       state = const AsyncData(AuthState.unauthenticated());
       return;
     }
-    state = AsyncData(await _loadUser(ref.read(authRepositoryProvider)));
+    state = AsyncData(
+      await _loadUser(ref.read(authRepositoryProvider), firebaseUser),
+    );
   }
 
   /// Updates the current user's display name and refreshes state.
@@ -61,11 +66,29 @@ class AuthController extends _$AuthController {
   User? get currentUser =>
       state.value?.maybeWhen(authenticated: (User u) => u, orElse: () => null);
 
-  Future<AuthState> _loadUser(AuthRepository repo) async {
+  Future<AuthState> _loadUser(AuthRepository repo, fb.User fbUser) async {
     final result = await repo.getCurrentUser();
     return result.when(
       success: AuthState.authenticated,
-      failure: (_) => const AuthState.unauthenticated(),
+      failure: (AppException e) {
+        if (e is UnauthorizedException) {
+          return const AuthState.unauthenticated();
+        }
+        dev.log(
+          'getCurrentUser failed (${e.runtimeType}): ${e.message}'
+          ' — keeping Firebase session',
+          name: 'Auth',
+        );
+        return AuthState.authenticated(
+          User(
+            id: 0,
+            email: fbUser.email ?? '',
+            firebaseUid: fbUser.uid,
+            displayName: fbUser.displayName ?? '',
+            hasProfile: true,
+          ),
+        );
+      },
     );
   }
 }
