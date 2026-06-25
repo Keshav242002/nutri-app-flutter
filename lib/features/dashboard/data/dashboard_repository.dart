@@ -22,6 +22,10 @@ class DashboardRepository {
   Future<Result<TodayMealPlan>> getTodayMealPlan() =>
       _wrap(_ds.fetchTodayMealPlan);
 
+  /// Fetches the planned meals for a specific date (e.g. tomorrow's preview).
+  Future<Result<TodayMealPlan>> getDayMealPlan(String dateIso) =>
+      _wrap(() => _ds.fetchDayMealPlan(dateIso));
+
   /// Fetches today's meal logs to restore card states on launch.
   Future<Result<List<MealLog>>> getTodayLogs(String date) =>
       _wrap(() => _ds.fetchTodayLogs(date));

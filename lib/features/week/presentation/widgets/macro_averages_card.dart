@@ -12,13 +12,18 @@ class MacroAveragesCard extends StatelessWidget {
     required this.averages,
     required this.targets,
     super.key,
+    this.title = 'Weekly Macro Averages',
   });
 
-  /// Average daily macro values for the week.
+  /// Average daily macro values for the period.
   final NutritionSummary averages;
 
   /// Daily macro targets (from the user's dietary profile).
   final NutritionSummary? targets;
+
+  /// Card heading. Defaults to the weekly label; pass a period-specific
+  /// title (e.g. "Monthly Macro Averages") to reuse for other ranges.
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,7 @@ class MacroAveragesCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Weekly Macro Averages',
+            title,
             style: AppTypography.labelMedium.copyWith(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,

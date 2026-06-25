@@ -73,40 +73,6 @@ class AuthRepository {
     }
   }
 
-  /// Sends a Firebase Email Link to [email].
-  Future<Result<void>> sendEmailLink(String email, String continueUrl) async {
-    try {
-      await _ds.sendSignInLinkToEmail(email, continueUrl);
-      return const Success(null);
-    } on AppException catch (e) {
-      return Failure(e);
-    } on DioException catch (e) {
-      final err = e.error;
-      return Failure(
-        err is AppException ? err : UnknownException(message: e.message ?? ''),
-      );
-    } on Object catch (e) {
-      return Failure(UnknownException(message: e.toString()));
-    }
-  }
-
-  /// Completes email-link sign-in then registers with the backend.
-  Future<Result<User>> signInWithEmailLink({
-    required String email,
-    required String emailLink,
-  }) async {
-    try {
-      await _ds.signInWithEmailLink(email: email, emailLink: emailLink);
-      return await _wrap(_ds.register);
-    } on AppException catch (e) {
-      return Failure(e);
-    } on fb.FirebaseAuthException catch (e) {
-      return Failure(_mapFirebaseError(e));
-    } on Object catch (e) {
-      return Failure(UnknownException(message: e.toString()));
-    }
-  }
-
   /// Signs out from Firebase and clears session.
   Future<Result<void>> signOut() async {
     try {
@@ -158,9 +124,6 @@ class AuthRepository {
         ),
         'too-many-requests' => const UnauthorizedException(
           message: 'Too many attempts. Please try again later.',
-        ),
-        'invalid-action-code' => const UnauthorizedException(
-          message: 'Sign-in link is invalid or has expired.',
         ),
         _ => UnknownException(message: e.message ?? e.code),
       };

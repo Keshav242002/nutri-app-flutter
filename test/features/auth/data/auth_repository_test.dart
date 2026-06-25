@@ -16,12 +16,10 @@ const _kUser = User(
 class _FakeDataSource extends Fake implements AuthRemoteDataSource {
   _FakeDataSource({
     this.throwOnGetMe = false,
-    this.throwOnSendLink = false,
     this.throwOnSignOut = false,
   });
 
   final bool throwOnGetMe;
-  final bool throwOnSendLink;
   final bool throwOnSignOut;
 
   @override
@@ -32,11 +30,6 @@ class _FakeDataSource extends Fake implements AuthRemoteDataSource {
 
   @override
   Future<User> register() async => _kUser;
-
-  @override
-  Future<void> sendSignInLinkToEmail(String email, String continueUrl) async {
-    if (throwOnSendLink) throw const NetworkException();
-  }
 
   @override
   Future<void> signOut() async {
@@ -68,24 +61,6 @@ void main() {
     test('returns Success(user) on datasource success', () async {
       final result = await _repo().register();
       expect(result, isA<Success<User>>());
-    });
-  });
-
-  group('AuthRepository.sendEmailLink', () {
-    test('returns Success(null) when link is sent', () async {
-      final result = await _repo().sendEmailLink(
-        'user@example.com',
-        'https://app.example.com/cb',
-      );
-      expect(result, isA<Success<void>>());
-    });
-
-    test('returns Failure(NetworkException) when datasource throws', () async {
-      final result = await _repo(
-        ds: _FakeDataSource(throwOnSendLink: true),
-      ).sendEmailLink('user@example.com', 'https://app.example.com/cb');
-      expect(result, isA<Failure<void>>());
-      expect((result as Failure<void>).exception, isA<NetworkException>());
     });
   });
 

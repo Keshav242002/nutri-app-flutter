@@ -1,5 +1,4 @@
 import 'package:ahara/core/network/api_exceptions.dart';
-import 'package:ahara/core/utils/validators.dart';
 import 'package:ahara/features/auth/data/auth_repository.dart';
 import 'package:ahara/features/auth/domain/models/login_form_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
@@ -9,14 +8,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_controller.g.dart';
 
-/// Deep-link URL used for Firebase Email Link sign-in.
-const _kEmailLinkContinueUrl = 'https://nutriplan.app/auth/callback';
-
 /// Manages the login screen state machine.
 ///
 /// State transitions:
 /// chooseMethod → emailPasswordEntry → emailPasswordSubmitting → success
-/// chooseMethod → emailEntry → emailLinkSending → emailLinkSent
 /// chooseMethod → googleSigningIn → success
 @riverpod
 class LoginController extends _$LoginController {
@@ -32,18 +27,6 @@ class LoginController extends _$LoginController {
       email: '',
       password: '',
       isSignUpMode: false,
-    );
-  }
-
-  /// Switches from password mode to magic-link mode.
-  void switchToMagicLink() {
-    final email = state.maybeWhen(
-      emailPasswordEntry: (e, _, __, ___) => e,
-      orElse: () => '',
-    );
-    state = LoginFormState.emailEntry(
-      email: email,
-      isValid: Validators.isValidEmail(email),
     );
   }
 
@@ -115,14 +98,6 @@ class LoginController extends _$LoginController {
     );
   }
 
-  /// Updates the email field and validates format.
-  void updateEmail(String email) {
-    state = LoginFormState.emailEntry(
-      email: email,
-      isValid: Validators.isValidEmail(email),
-    );
-  }
-
   /// Returns to [LoginFormState.chooseMethod].
   void goBack() => state = const LoginFormState.chooseMethod();
 
@@ -140,52 +115,6 @@ class LoginController extends _$LoginController {
         );
       },
       orElse: () {},
-    );
-  }
-
-  /// Sends a Firebase Email Link to the entered email address.
-  Future<void> sendEmailLink(String email) async {
-    state = LoginFormState.emailLinkSending(email: email);
-
-    final result = await _repo.sendEmailLink(email, _kEmailLinkContinueUrl);
-
-    state = result.when<LoginFormState>(
-      success: (_) =>
-          LoginFormState.emailLinkSent(email: email, resendCountdown: 45),
-      failure: (AppException e) => LoginFormState.error(e.message),
-    );
-  }
-
-  /// Ticks the resend countdown down by one second.
-  void tickResendCountdown(String email, int current) {
-    if (current <= 0) return;
-    state = LoginFormState.emailLinkSent(
-      email: email,
-      resendCountdown: current - 1,
-    );
-  }
-
-  /// Resends the email link and resets the countdown.
-  Future<void> resendEmailLink(String email) => sendEmailLink(email);
-
-  /// Completes sign-in from an intercepted deep link.
-  Future<void> completeEmailLinkSignIn({
-    required String email,
-    required String emailLink,
-  }) async {
-    state = LoginFormState.emailLinkVerifying(email: email);
-
-    final result = await _repo.signInWithEmailLink(
-      email: email,
-      emailLink: emailLink,
-    );
-
-    state = result.when<LoginFormState>(
-      success: (User user) {
-        ref.read(authControllerProvider.notifier).setAuthenticated(user);
-        return LoginFormState.success(user);
-      },
-      failure: (AppException e) => LoginFormState.error(e.message),
     );
   }
 

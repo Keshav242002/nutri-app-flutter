@@ -61,10 +61,16 @@ class _SwapSheetState extends State<SwapSheet> {
   void dispose() {
     _autoClose?.cancel();
     // Commit on any dismissal (manual or auto-close), exactly once.
+    // Deferred off the dispose frame: modifying a provider during a widget
+    // life-cycle (dispose runs inside the build/finalize phase) is illegal in
+    // Riverpod and throws "Tried to modify a provider while the widget tree
+    // was building", which corrupts the frame pipeline. Scheduling it in a
+    // `Future` runs the commit after the tree is done building.
     final recipe = _result;
     if (recipe != null && !_applied) {
       _applied = true;
-      widget.onApply(recipe);
+      final onApply = widget.onApply;
+      Future(() => onApply(recipe));
     }
     super.dispose();
   }

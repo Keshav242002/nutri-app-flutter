@@ -9,8 +9,8 @@ import 'package:go_router/go_router.dart';
 
 /// Brand entrance screen (~2s animation, then auth-gate navigation).
 ///
-/// Four-phase animation: mark springs in → wordmark rises →
-/// tagline breathes in → hold → fade to Cream → navigate.
+/// Three-phase animation: wordmark springs in → tagline breathes in →
+/// hold → fade out → navigate.
 class SplashScreen extends ConsumerStatefulWidget {
   /// Creates the [SplashScreen].
   const SplashScreen({super.key});
@@ -22,8 +22,7 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double> _markScale;
-  late final Animation<double> _markOpacity;
+  late final Animation<double> _wordmarkScale;
   late final Animation<double> _wordmarkOpacity;
   late final Animation<Offset> _wordmarkSlide;
   late final Animation<double> _taglineOpacity;
@@ -39,40 +38,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(milliseconds: 2350),
     );
 
-    // Phase 1 — mark springs in (0–600ms)
-    _markScale = Tween<double>(begin: 0.6, end: 1).animate(
+    // Phase 1 — wordmark springs in (0–700ms)
+    _wordmarkScale = Tween<double>(begin: 0.7, end: 1).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0, 0.255, curve: Curves.elasticOut),
+        curve: const Interval(0, 0.3, curve: Curves.elasticOut),
       ),
     );
-    _markOpacity = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve: const Interval(0, 0.15, curve: Curves.easeOut),
-      ),
-    );
-
-    // Phase 2 — wordmark rises (600–1000ms)
     _wordmarkOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.255, 0.425, curve: Curves.easeOut),
+        curve: const Interval(0, 0.17, curve: Curves.easeOut),
       ),
     );
     _wordmarkSlide =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _ctrl,
-            curve: const Interval(0.255, 0.425, curve: Curves.easeOut),
+            curve: const Interval(0, 0.3, curve: Curves.easeOut),
           ),
         );
 
-    // Phase 3 — tagline breathes in (1000–1350ms)
+    // Phase 2 — tagline breathes in (700–1050ms)
     _taglineOpacity = Tween<double>(begin: 0, end: 0.55).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.425, 0.575, curve: Curves.easeOut),
+        curve: const Interval(0.3, 0.45, curve: Curves.easeOut),
       ),
     );
 
@@ -132,11 +123,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(flex: 9),
-                _buildMark(),
-                const SizedBox(height: 20),
                 _buildWordmark(),
                 const SizedBox(height: 10),
-                _buildTagline(),
+             //   _buildTagline(),
                 const Spacer(flex: 11),
               ],
             ),
@@ -146,19 +135,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
-  Widget _buildMark() => FadeTransition(
-    opacity: _markOpacity,
-    child: ScaleTransition(
-      scale: _markScale,
-      child: Image.asset('assets/logo_mark_dark.png', width: 88, height: 88),
-    ),
-  );
-
   Widget _buildWordmark() => FadeTransition(
     opacity: _wordmarkOpacity,
     child: SlideTransition(
       position: _wordmarkSlide,
-      child: Image.asset('assets/logo_dark.png', width: 160),
+      child: ScaleTransition(
+        scale: _wordmarkScale,
+        child: Image.asset('assets/logo_dark.png', width: 200),
+      ),
     ),
   );
 

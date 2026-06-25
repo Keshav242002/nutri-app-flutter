@@ -1,14 +1,16 @@
 import 'package:ahara/core/network/api_exceptions.dart';
-import 'package:ahara/core/providers/toast_provider.dart';
 import 'package:ahara/core/routing/route_paths.dart';
 import 'package:ahara/core/theme/app_colors.dart';
+import 'package:ahara/core/theme/app_radius.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
 import 'package:ahara/core/theme/app_typography.dart';
+import 'package:ahara/core/widgets/app_button.dart';
 import 'package:ahara/core/widgets/error_state.dart';
 import 'package:ahara/core/widgets/loading_state.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
 import 'package:ahara/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ahara/features/dashboard/domain/meal_timing.dart';
 import 'package:ahara/features/dashboard/domain/models/daily_nutrition.dart';
 import 'package:ahara/features/dashboard/domain/models/meal_card_state.dart';
 import 'package:ahara/features/dashboard/domain/models/recipe_slim.dart';
@@ -21,6 +23,8 @@ import 'package:ahara/features/dashboard/presentation/widgets/dashboard/log_choo
 import 'package:ahara/features/dashboard/presentation/widgets/dashboard/mark_as_eaten_sheet.dart';
 import 'package:ahara/features/dashboard/presentation/widgets/dashboard/meal_options_sheet.dart';
 import 'package:ahara/features/dashboard/presentation/widgets/dashboard/swap_sheet.dart';
+import 'package:ahara/features/notifications/presentation/controllers/unread_count_controller.dart';
+import 'package:ahara/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -72,6 +76,18 @@ class _DashboardBody extends ConsumerWidget {
     final firstName = _firstName(user?.displayName ?? '');
     final now = DateTime.now();
 
+    // Non-blocking: the meal UI never waits on the profile fetch. Used only to
+    // tailor a brand-new account's first day.
+    final createdAt = ref.watch(profileControllerProvider).value?.createdAt;
+    final isFirstDay = createdAt != null && _isSameLocalDay(createdAt, now);
+
+    // On day one, only show meals whose window hadn't ended at signup; existing
+    // users (and day 2+) always see the full day. Empty = signed up too late.
+    final slots = isFirstDay
+        ? firstDaySlots(createdAt.toLocal())
+        : MealSlot.values;
+    final dayOver = isFirstDay && slots.isEmpty;
+
     return RefreshIndicator(
       color: AppColors.navyDeep,
       onRefresh: () => ref.refresh(dashboardControllerProvider.future),
@@ -95,16 +111,23 @@ class _DashboardBody extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               AmbientCalorieViz(nutrition: state.nutrition),
               const SizedBox(height: AppSpacing.lg),
-              if (_dayComplete(state)) ...[
-                _DayCompleteBar(nutrition: state.nutrition),
+              if (dayOver) ...[
+                const _DayOverCard(),
+              ] else ...[
+                if (_dayComplete(state, slots)) ...[
+                  _DayCompleteBar(nutrition: state.nutrition),
+                  const SizedBox(height: AppSpacing.md),
+                ] else if (isFirstDay) ...[
+                  _WelcomeBanner(firstName: firstName),
+                  const SizedBox(height: AppSpacing.md),
+                ] else if (_showNudge(now, state, slots)) ...[
+                  _NudgeBar(slot: currentMealSlot(now)),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                const _SectionHeader(),
                 const SizedBox(height: AppSpacing.md),
-              ] else if (_showNudge(now, state)) ...[
-                _NudgeBar(hour: now.hour, state: state),
-                const SizedBox(height: AppSpacing.md),
+                _MealCardList(state: state, slots: slots),
               ],
-              const _SectionHeader(),
-              const SizedBox(height: AppSpacing.md),
-              _MealCardList(state: state),
             ]),
           ),
         ),
@@ -118,22 +141,38 @@ class _DashboardBody extends ConsumerWidget {
     return displayName.trim().split(' ').first;
   }
 
-  static bool _showNudge(DateTime now, DashboardState state) {
-    final hour = now.hour;
-    final lunchPlanned = state.lunchState is PlannedMealCard;
-    final dinnerPlanned = state.dinnerState is PlannedMealCard;
-    return (hour > 13 && lunchPlanned) || (hour >= 18 && dinnerPlanned);
+  /// Nudge only about the *current* meal, while it's visible and un-logged.
+  static bool _showNudge(
+    DateTime now,
+    DashboardState state,
+    List<MealSlot> slots,
+  ) {
+    final current = currentMealSlot(now);
+    return slots.contains(current) &&
+        _slotState(state, current) is PlannedMealCard;
   }
 
-  /// True once every slot is resolved (eaten/logged/skipped, none still
-  /// planned) and a calorie target exists — gates the end-of-day summary.
-  static bool _dayComplete(DashboardState state) {
-    final allResolved = state.breakfastState is! PlannedMealCard &&
-        state.lunchState is! PlannedMealCard &&
-        state.dinnerState is! PlannedMealCard;
+  /// True once every *visible* slot is resolved (eaten/logged/skipped) and a
+  /// calorie target exists — gates the end-of-day summary.
+  static bool _dayComplete(DashboardState state, List<MealSlot> slots) {
+    final allResolved =
+        slots.every((slot) => _slotState(state, slot) is! PlannedMealCard);
     return allResolved && state.nutrition.targets.calories > 0;
   }
+
+  static bool _isSameLocalDay(DateTime a, DateTime b) {
+    final localA = a.toLocal();
+    return localA.year == b.year &&
+        localA.month == b.month &&
+        localA.day == b.day;
+  }
 }
+
+MealCardState _slotState(DashboardState s, MealSlot slot) => switch (slot) {
+  MealSlot.breakfast => s.breakfastState,
+  MealSlot.lunch => s.lunchState,
+  MealSlot.dinner => s.dinnerState,
+};
 
 // ---------------------------------------------------------------------------
 // App bar
@@ -185,15 +224,23 @@ class _AppBar extends StatelessWidget {
       centerTitle: true,
       actions: [
         Consumer(
-          builder: (context, ref, _) => IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: AppColors.navyDeep,
-            ),
-            onPressed: () => ref
-                .read(toastProvider.notifier)
-                .show('Notifications coming soon'),
-          ),
+          builder: (context, ref, _) {
+            final count = ref.watch(unreadCountControllerProvider).value ?? 0;
+            final bell = IconButton(
+              icon: const Icon(
+                Icons.notifications_none_rounded,
+                color: AppColors.navyDeep,
+              ),
+              onPressed: () => context.go(RoutePaths.notifications),
+            );
+            if (count == 0) return bell;
+            return Badge(
+              label: Text(count > 99 ? '99+' : '$count'),
+              backgroundColor: AppColors.turmeric,
+              offset: const Offset(-6, 6),
+              child: bell,
+            );
+          },
         ),
       ],
     );
@@ -205,17 +252,17 @@ class _AppBar extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _NudgeBar extends StatelessWidget {
-  const _NudgeBar({required this.hour, required this.state});
+  const _NudgeBar({required this.slot});
 
-  final int hour;
-  final DashboardState state;
+  final MealSlot slot;
 
   @override
   Widget build(BuildContext context) {
-    final lunchPlanned = state.lunchState is PlannedMealCard;
-    final msg = lunchPlanned && hour > 13
-        ? 'Lunch time — have you eaten yet?'
-        : 'Dinner time — have you eaten yet?';
+    final name = switch (slot) {
+      MealSlot.breakfast => 'Breakfast',
+      MealSlot.lunch => 'Lunch',
+      MealSlot.dinner => 'Dinner',
+    };
 
     return Row(
       children: [
@@ -226,12 +273,109 @@ class _NudgeBar extends StatelessWidget {
         ),
         const SizedBox(width: AppSpacing.xs),
         Text(
-          msg,
+          '$name time — have you eaten yet?',
           style: AppTypography.caption.copyWith(
             color: AppColors.textSecondary,
           ),
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// First-day welcome banner
+// ---------------------------------------------------------------------------
+
+/// Shown on the account's first day to frame the plan for a late joiner:
+/// the full day is on display, but logging starts from the current meal.
+class _WelcomeBanner extends StatelessWidget {
+  const _WelcomeBanner({required this.firstName});
+
+  final String firstName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.turmeric.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.turmeric.withValues(alpha: 0.30)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.celebration_rounded,
+            size: 20,
+            color: AppColors.turmeric,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              "Welcome, $firstName! Your plan's ready — start logging from "
+              'your next meal. Earlier meals are optional today.',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// First-day "day over" card — shown when a new account signs up after dinner
+// ---------------------------------------------------------------------------
+
+class _DayOverCard extends StatelessWidget {
+  const _DayOverCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.creamDeep,
+        borderRadius: AppRadius.card,
+        border: Border.all(color: AppColors.creamBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.bedtime_outlined,
+            size: 28,
+            color: AppColors.turmeric,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            "Today's meals are done",
+            style: AppTypography.headingMedium.copyWith(
+              color: AppColors.navyDeep,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "You've joined after today's meal times — your plan picks up "
+            'fresh tomorrow.',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              label: "See tomorrow's plan",
+              onPressed: () => context.push(RoutePaths.tomorrowPreview),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -323,22 +467,18 @@ class _SectionHeader extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _MealCardList extends ConsumerStatefulWidget {
-  const _MealCardList({required this.state});
+  const _MealCardList({required this.state, required this.slots});
 
   final DashboardState state;
+
+  /// The meal slots to render (first-day filtering may show a subset).
+  final List<MealSlot> slots;
 
   @override
   ConsumerState<_MealCardList> createState() => _MealCardListState();
 }
 
 class _MealCardListState extends ConsumerState<_MealCardList> {
-
-  MealSlot? _currentSlot() {
-    final h = DateTime.now().hour;
-    if (h < 11) return MealSlot.breakfast;
-    if (h < 16) return MealSlot.lunch;
-    return MealSlot.dinner;
-  }
 
   RecipeSlim? _plannedRecipe(MealSlot slot) {
     return switch (slot) {
@@ -466,13 +606,14 @@ class _MealCardListState extends ConsumerState<_MealCardList> {
 
   @override
   Widget build(BuildContext context) {
+    final current = currentMealSlot(DateTime.now());
     return Column(
-      children: MealSlot.values.map((slot) {
+      children: widget.slots.map((slot) {
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: DashboardMealCard(
             cardState: _cardState(slot),
-            isCurrentSlot: _currentSlot() == slot,
+            isCurrentSlot: current == slot,
             onMarkEaten: () => _onMarkEaten(slot),
             onOptions: () => _onOptions(slot),
             onTap: () => _onTap(slot),

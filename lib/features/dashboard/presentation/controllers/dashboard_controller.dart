@@ -1,4 +1,5 @@
 import 'package:ahara/core/network/api_exceptions.dart';
+import 'package:ahara/core/providers/meal_plan_sync_provider.dart';
 import 'package:ahara/core/providers/toast_provider.dart';
 import 'package:ahara/core/providers/tracker_sync_provider.dart';
 import 'package:ahara/core/utils/result.dart';
@@ -36,9 +37,13 @@ abstract class DashboardState with _$DashboardState {
 class DashboardController extends _$DashboardController {
   @override
   Future<DashboardState> build() async {
-    // A meal logged on any screen (e.g. the week tab) bumps this revision;
-    // refetch nutrition + today's logs so the orbit and meal cards stay live.
-    ref.listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision());
+    ref
+      // A meal logged on any screen (e.g. the week tab) bumps this revision;
+      // refetch nutrition + today's logs so the orbit and cards stay live.
+      ..listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision())
+      // A meal swapped on any screen (e.g. the week tab) bumps this revision;
+      // refetch today's plan so the meal cards reflect the new recipe.
+      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision());
 
     final repo = ref.read(dashboardRepositoryProvider);
     final today = _today();
@@ -249,6 +254,9 @@ class DashboardController extends _$DashboardController {
         MealCardState.planned(recipe: newRecipe, slot: slot),
       ),
     );
+    // Notify other screens (e.g. the week tab) that the plan changed so they
+    // can refetch. The swap was already persisted server-side by fetchSwap.
+    ref.read(mealPlanRevisionProvider.notifier).bump();
   }
 
   // ---------------------------------------------------------------------------
@@ -318,6 +326,49 @@ class DashboardController extends _$DashboardController {
       failure: (AppException _) {},
     );
     state = AsyncData(updated);
+  }
+
+  /// Refetches today's meal plan (and logs) after a swap made on another
+  /// screen bumps [mealPlanRevisionProvider]. Rebuilds the meal cards from the
+  /// new plan; nutrition is left untouched (a swap doesn't change what's been
+  /// eaten).
+  Future<void> _syncPlanFromRevision() async {
+    final s = state.value;
+    if (s == null) return;
+    final repo = ref.read(dashboardRepositoryProvider);
+    final today = _today();
+
+    late Result<TodayMealPlan> planResult;
+    late Result<List<MealLog>> logsResult;
+    await Future.wait<void>([
+      repo
+          .getTodayMealPlan()
+          .then((Result<TodayMealPlan> r) => planResult = r),
+      repo
+          .getTodayLogs(today)
+          .then((Result<List<MealLog>> r) => logsResult = r),
+    ]);
+
+    final cur = state.value;
+    if (cur == null) return;
+
+    final plan = planResult.when(
+      success: (TodayMealPlan d) => d,
+      failure: (AppException _) => cur.mealPlan,
+    );
+    final logs = logsResult.when(
+      success: (List<MealLog> d) => d,
+      failure: (AppException _) => <MealLog>[],
+    );
+
+    state = AsyncData(
+      cur.copyWith(
+        mealPlan: plan,
+        breakfastState: _cardFromLog(logs, MealSlot.breakfast, plan.breakfast),
+        lunchState: _cardFromLog(logs, MealSlot.lunch, plan.lunch),
+        dinnerState: _cardFromLog(logs, MealSlot.dinner, plan.dinner),
+      ),
+    );
   }
 
   void _showError(String message) =>

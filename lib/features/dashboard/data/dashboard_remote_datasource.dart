@@ -25,6 +25,15 @@ class DashboardRemoteDataSource {
     return EnvelopeParser.parseSuccess(response.data!, TodayMealPlan.fromJson);
   }
 
+  /// Calls `GET /api/v1/mealplans/day/<YYYY-MM-DD>/` — any date (lazily
+  /// generated server-side). Used for the first-day "tomorrow" preview.
+  Future<TodayMealPlan> fetchDayMealPlan(String dateIso) async {
+    final response =
+        await _dio.get<Map<String, dynamic>>('/mealplans/day/$dateIso/');
+    dev.log('GET /mealplans/day/$dateIso/ → ${response.data}', name: 'API');
+    return EnvelopeParser.parseSuccess(response.data!, TodayMealPlan.fromJson);
+  }
+
   /// Calls `GET /api/v1/tracker/log/?date=YYYY-MM-DD`.
   ///
   /// Used on launch to restore card states from prior logs.
