@@ -27,9 +27,24 @@ abstract final class RoutePaths {
   /// User profile screen.
   static const profile = '/profile';
 
+  /// Edit dietary profile — sub-route of the profile branch.
+  static const profileEdit = '/profile/edit';
+
+  /// Monthly nutrition report — sub-route of the profile branch.
+  static const profileReport = '/profile/report';
+
+  /// Notification settings — sub-route of the profile branch.
+  static const profileNotifications = '/profile/notifications';
+
   /// F2 computed-targets summary after onboarding submit.
   static const yourPlan = '/your-plan';
 
   /// Recipe detail screen — sub-route of home branch.
   static const recipeDetail = '/home/recipe/:slug';
+
+  /// In-app notification list — opened from the home-appbar bell (F7).
+  static const notifications = '/home/notifications';
+
+  /// Read-only preview of tomorrow's plan — for a first-day late signup.
+  static const tomorrowPreview = '/home/tomorrow';
 }

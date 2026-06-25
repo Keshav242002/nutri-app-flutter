@@ -88,6 +88,8 @@ class YourPlanScreen extends StatelessWidget {
                   const SizedBox(height: AppSpacing.md),
                   // Macro 2×2 grid
                   _MacroGrid(profile: profile),
+                  const SizedBox(height: AppSpacing.lg),
+                  const _DailyDeliveryNote(),
                   const SizedBox(height: AppSpacing.xl),
                   SizedBox(
                     width: double.infinity,
@@ -106,6 +108,49 @@ class YourPlanScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Daily-delivery note — sets the expectation that plans arrive day-by-day
+// ---------------------------------------------------------------------------
+
+class _DailyDeliveryNote extends StatelessWidget {
+  const _DailyDeliveryNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.creamDeep,
+        borderRadius: AppRadius.card,
+        border: Border.all(color: AppColors.creamBorder),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.event_repeat_rounded,
+            size: 20,
+            color: AppColors.turmeric,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Your meal plan arrives fresh each day — not all at once. Open '
+              "the app each day for that day's meals, and turn on "
+              'notifications to get a heads-up.',
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.5,
               ),
             ),
           ),

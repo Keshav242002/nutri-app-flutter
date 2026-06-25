@@ -1,8 +1,11 @@
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/theme/app_colors.dart';
+import 'package:ahara/core/theme/app_radius.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
+import 'package:ahara/core/theme/app_typography.dart';
 import 'package:ahara/core/widgets/error_state.dart';
 import 'package:ahara/core/widgets/loading_state.dart';
+import 'package:ahara/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:ahara/features/week/domain/models/week_state.dart';
 import 'package:ahara/features/week/domain/models/weekly_nutrition.dart';
 import 'package:ahara/features/week/presentation/controllers/week_controller.dart';
@@ -129,6 +132,31 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
   }
 
   Widget _buildContent(WeekState state) {
+    // On the account's first day there are no logs yet, so weekly stats are
+    // meaningless and the meal grid is just the auto-generated plan — show a
+    // short note + the grocery list only. Clears the next day.
+    final createdAt = ref.watch(profileControllerProvider).value?.createdAt;
+    final firstDay =
+        createdAt != null && _isSameLocalDay(createdAt, DateTime.now());
+
+    final grocerySliver = SliverToBoxAdapter(
+      child: KeyedSubtree(
+        key: _groceryKey,
+        child: WeekGrocerySection(
+          groceryList: state.groceryList,
+          isLoading: state.isGroceryLoading,
+          hasError: state.groceryError != null,
+          checkedItems: state.checkedItems,
+          onLoad: () =>
+              ref.read(weekControllerProvider.notifier).loadGrocery(),
+          onRefresh: () =>
+              ref.read(weekControllerProvider.notifier).refreshGrocery(),
+          onToggleItem: (id) =>
+              ref.read(weekControllerProvider.notifier).toggleGroceryItem(id),
+        ),
+      ),
+    );
+
     return Column(
       children: [
         // Sticky header — kept outside the scroll view. A pinned
@@ -141,6 +169,7 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
           selectedDay: state.selectedDay,
           weeklyNutrition: state.weeklyNutrition,
           activeSection: _activeSection,
+          showSections: !firstDay,
           onPrev: () => ref.read(weekControllerProvider.notifier).prevWeek(),
           onNext: () => ref.read(weekControllerProvider.notifier).nextWeek(),
           onDayTap: (day) =>
@@ -151,55 +180,48 @@ class _WeekScreenState extends ConsumerState<WeekScreen> {
           child: CustomScrollView(
             key: _scrollViewKey,
             controller: _scrollController,
-            slivers: [
-              // Meals section
-              SliverToBoxAdapter(
-                child: KeyedSubtree(
-                  key: _mealsKey,
-                  child: WeekMealSection(
-                    selectedDay: state.selectedDay,
-                    weekPlans: state.weekPlans,
-                    dayLogs: state.selectedDayLogs,
-                  ),
-                ),
-              ),
+            slivers: firstDay
+                ? [
+                    const SliverToBoxAdapter(child: _FirstDayNote()),
+                    grocerySliver,
+                  ]
+                : [
+                    // Meals section
+                    SliverToBoxAdapter(
+                      child: KeyedSubtree(
+                        key: _mealsKey,
+                        child: WeekMealSection(
+                          selectedDay: state.selectedDay,
+                          weekPlans: state.weekPlans,
+                          dayLogs: state.selectedDayLogs,
+                        ),
+                      ),
+                    ),
 
-              // Stats section
-              SliverToBoxAdapter(
-                child: KeyedSubtree(
-                  key: _statsKey,
-                  child: WeekStatsSection(
-                    weekStart: state.weekStart,
-                    weeklyNutrition: state.weeklyNutrition,
-                  ),
-                ),
-              ),
+                    // Stats section
+                    SliverToBoxAdapter(
+                      child: KeyedSubtree(
+                        key: _statsKey,
+                        child: WeekStatsSection(
+                          weekStart: state.weekStart,
+                          weeklyNutrition: state.weeklyNutrition,
+                        ),
+                      ),
+                    ),
 
-              // Grocery section
-              SliverToBoxAdapter(
-                child: KeyedSubtree(
-                  key: _groceryKey,
-                  child: WeekGrocerySection(
-                    groceryList: state.groceryList,
-                    isLoading: state.isGroceryLoading,
-                    hasError: state.groceryError != null,
-                    checkedItems: state.checkedItems,
-                    onLoad: () =>
-                        ref.read(weekControllerProvider.notifier).loadGrocery(),
-                    onRefresh: () => ref
-                        .read(weekControllerProvider.notifier)
-                        .refreshGrocery(),
-                    onToggleItem: (id) => ref
-                        .read(weekControllerProvider.notifier)
-                        .toggleGroceryItem(id),
-                  ),
-                ),
-              ),
-            ],
+                    grocerySliver,
+                  ],
           ),
         ),
       ],
     );
+  }
+
+  static bool _isSameLocalDay(DateTime a, DateTime b) {
+    final localA = a.toLocal();
+    return localA.year == b.year &&
+        localA.month == b.month &&
+        localA.day == b.day;
   }
 }
 
@@ -217,6 +239,7 @@ class _WeekHeader extends StatelessWidget {
     required this.onNext,
     required this.onDayTap,
     required this.onSectionTap,
+    this.showSections = true,
   });
 
   final DateTime weekStart;
@@ -227,6 +250,10 @@ class _WeekHeader extends StatelessWidget {
   final VoidCallback onNext;
   final void Function(DateTime) onDayTap;
   final void Function(WeekSection) onSectionTap;
+
+  /// When false (first day), hides the day selector + section pills, since
+  /// only the grocery list is shown.
+  final bool showSections;
 
   @override
   Widget build(BuildContext context) {
@@ -243,16 +270,67 @@ class _WeekHeader extends StatelessWidget {
             onPrev: onPrev,
             onNext: onNext,
           ),
-          const SizedBox(height: AppSpacing.xs),
-          DaySelectorRow(
-            weekStart: weekStart,
-            selectedDay: selectedDay,
-            weeklyNutrition: weeklyNutrition,
-            onDayTap: onDayTap,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          SectionJumpPills(active: activeSection, onTap: onSectionTap),
+          if (showSections) ...[
+            const SizedBox(height: AppSpacing.xs),
+            DaySelectorRow(
+              weekStart: weekStart,
+              selectedDay: selectedDay,
+              weeklyNutrition: weeklyNutrition,
+              onDayTap: onDayTap,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SectionJumpPills(active: activeSection, onTap: onSectionTap),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// First-day note — shown above the grocery list before the user has logged
+// anything, in place of the (empty) weekly stats + meal grid.
+// ---------------------------------------------------------------------------
+
+class _FirstDayNote extends StatelessWidget {
+  const _FirstDayNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenHorizontal,
+        AppSpacing.md,
+        AppSpacing.screenHorizontal,
+        0,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.turmeric.withValues(alpha: 0.10),
+          borderRadius: AppRadius.card,
+          border: Border.all(color: AppColors.turmeric.withValues(alpha: 0.30)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.insights_outlined,
+              size: 20,
+              color: AppColors.turmeric,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                'Your weekly stats will appear here once you start logging '
+                "your meals. For now, here's your grocery list to get started.",
+                style: AppTypography.bodyMedium.copyWith(
+                  color: AppColors.textPrimary,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

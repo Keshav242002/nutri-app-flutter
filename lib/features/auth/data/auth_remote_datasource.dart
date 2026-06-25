@@ -84,33 +84,6 @@ class AuthRemoteDataSource {
     String password,
   ) => _auth.createUserWithEmailAndPassword(email: email, password: password);
 
-  /// Sends a Firebase Email Link to [email].
-  Future<void> sendSignInLinkToEmail(String email, String continueUrl) async {
-    final settings = fb.ActionCodeSettings(
-      url: continueUrl,
-      handleCodeInApp: true,
-      iOSBundleId: 'com.ahara.ahara',
-      androidPackageName: 'com.ahara.ahara',
-      androidInstallApp: true,
-      androidMinimumVersion: '21',
-    );
-    await _auth.sendSignInLinkToEmail(
-      email: email,
-      actionCodeSettings: settings,
-    );
-  }
-
-  /// Completes email-link sign-in from the intercepted deep link.
-  Future<fb.UserCredential> signInWithEmailLink({
-    required String email,
-    required String emailLink,
-  }) async {
-    if (!_auth.isSignInWithEmailLink(emailLink)) {
-      throw const UnauthorizedException(message: 'Invalid sign-in link.');
-    }
-    return _auth.signInWithEmailLink(email: email, emailLink: emailLink);
-  }
-
   /// Signs out from Firebase and Google.
   Future<void> signOut() async {
     await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);

@@ -1,3 +1,4 @@
+import 'package:ahara/core/providers/meal_plan_sync_provider.dart';
 import 'package:ahara/core/providers/toast_provider.dart';
 import 'package:ahara/core/providers/tracker_sync_provider.dart';
 import 'package:ahara/core/utils/result.dart';
@@ -25,7 +26,13 @@ class WeekController extends _$WeekController {
     // silently refetch weekly nutrition + the selected day's logs so the
     // stats, day chips and per-meal statuses stay live. Grocery and the
     // current week / selected day are deliberately left untouched.
-    ref.listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision());
+    ref
+      // A meal logged on any screen (e.g. the home tab) bumps this revision;
+      // refetch weekly nutrition + the selected day's logs so stats stay live.
+      ..listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision())
+      // A meal swapped on any screen (e.g. the home tab) bumps this revision;
+      // refetch the displayed week's plans so day cards show the new recipe.
+      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision());
 
     final repo = ref.read(weekRepositoryProvider);
     final now = DateTime.now();
@@ -314,6 +321,30 @@ class WeekController extends _$WeekController {
     }).toList();
 
     state = AsyncData(s.copyWith(weekPlans: updatedPlans));
+    // Notify other screens (e.g. the home tab) that the plan changed so they
+    // can refetch. The swap was already persisted server-side by fetchSwap.
+    ref.read(mealPlanRevisionProvider.notifier).bump();
+  }
+
+  /// Refetches the displayed week's plans after a swap made on another screen
+  /// bumps [mealPlanRevisionProvider]. Only the meal plans are refreshed;
+  /// nutrition, grocery, the selected day and its logs are left untouched.
+  Future<void> _syncPlanFromRevision() async {
+    final s = state.value;
+    if (s == null) return;
+
+    final result = await ref
+        .read(weekRepositoryProvider)
+        .getWeekMealPlans(_fmt(s.weekStart));
+    result.when(
+      success: (List<WeekMealDay> plans) {
+        final cur = state.value;
+        if (cur != null) {
+          state = AsyncData(cur.copyWith(weekPlans: plans));
+        }
+      },
+      failure: (_) {},
+    );
   }
 
   Future<void> _refreshNutritionSilently() async {

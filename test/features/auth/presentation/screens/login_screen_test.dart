@@ -1,4 +1,3 @@
-import 'package:ahara/core/utils/result.dart';
 import 'package:ahara/features/auth/data/auth_repository.dart';
 import 'package:ahara/features/auth/domain/models/login_form_state.dart';
 import 'package:ahara/features/auth/presentation/controllers/login_controller.dart';
@@ -8,11 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _FakeRepo extends Fake implements AuthRepository {
-  @override
-  Future<Result<void>> sendEmailLink(String email, String continueUrl) async =>
-      const Success(null);
-}
+class _FakeRepo extends Fake implements AuthRepository {}
 
 /// Fake notifier for direct state injection in widget tests.
 class _FakeLoginController extends LoginController {
@@ -54,33 +49,18 @@ void main() {
     });
   });
 
-  group('LoginScreen — emailEntry state', () {
-    testWidgets('shows text field when in emailEntry state', (tester) async {
+  group('LoginScreen — emailPasswordEntry state', () {
+    testWidgets('shows email and password fields', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          state: const LoginFormState.emailEntry(
+          state: const LoginFormState.emailPasswordEntry(
             email: 'hello@example.com',
-            isValid: true,
+            password: '',
+            isSignUpMode: false,
           ),
         ),
       );
-      expect(find.byType(TextField), findsOneWidget);
-    });
-  });
-
-  group('LoginScreen — emailLinkSent state', () {
-    testWidgets('shows "check your email" heading', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          state: const LoginFormState.emailLinkSent(
-            email: 'hello@example.com',
-            resendCountdown: 30,
-          ),
-        ),
-      );
-      // 'Check your email' is a plain Text widget; the email address is inside
-      // a RichText TextSpan so textContaining won't match it directly.
-      expect(find.text('Check your email'), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(2));
     });
   });
 

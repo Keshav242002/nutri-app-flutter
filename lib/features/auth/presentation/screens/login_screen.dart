@@ -11,19 +11,15 @@ import 'package:ahara/core/widgets/loading_state.dart';
 import 'package:ahara/features/auth/domain/models/login_form_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
 import 'package:ahara/features/auth/presentation/controllers/login_controller.dart';
-import 'package:ahara/features/auth/presentation/widgets/email_link_sent_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// Combined login + signup screen.
 ///
 /// States inside the bottom sheet:
 /// A — choose method (Google / Email)
-/// B — email + password entry (default email flow)
-/// C — email link entry (magic link alternative)
-/// D — email link sent / "check your email"
+/// B — email + password entry
 class LoginScreen extends ConsumerStatefulWidget {
   /// Creates the [LoginScreen].
   const LoginScreen({super.key});
@@ -123,12 +119,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       emailPasswordEntry: _buildEmailPasswordEntry,
       emailPasswordSubmitting: (String email) =>
           _buildEmailPasswordEntry(email, '', false, null, loading: true),
-      emailEntry: _buildEmailEntry,
-      emailLinkSending: (String email) =>
-          _buildEmailEntry(email, true, null, loading: true),
-      emailLinkSent: _buildEmailLinkSent,
-      emailLinkVerifying: (String _) =>
-          const LoadingState(message: 'Signing you in…'),
       googleSigningIn: _buildGoogleLoading,
       success: _buildSuccessLoading,
       // Error is surfaced via toast; render choose-method while toast shows.
@@ -285,96 +275,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               : null,
           isLoading: loading,
         ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: ctrl.switchToMagicLink,
-          child: Text(
-            'Use magic link instead',
-            style: AppTypography.labelMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
       ],
-    );
-  }
-
-  // --- State C: email link entry ---
-
-  Widget _buildEmailEntry(
-    String email,
-    bool isValid,
-    String? errorMessage, {
-    bool loading = false,
-  }) {
-    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
-    if (_emailCtrl.text != email) _emailCtrl.text = email;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
-            color: AppColors.navyDeep.withValues(alpha: 0.5),
-            onPressed: ctrl.goBack,
-            padding: EdgeInsets.zero,
-          ),
-        ),
-        Text(
-          'Enter your email',
-          style: AppTypography.displayMedium.copyWith(
-            color: AppColors.navyDeep,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          "We'll send you a sign-in link",
-          style: AppTypography.labelMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 20),
-        AppTextField(
-          controller: _emailCtrl,
-          placeholder: 'yourname@email.com',
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          autofocus: true,
-          onChanged: ctrl.updateEmail,
-          errorText: errorMessage,
-          onSubmitted: isValid
-              ? (_) => _sendLinkAndSaveEmail(_emailCtrl.text, ctrl)
-              : null,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        AppButton(
-          label: 'Send sign-in link',
-          onPressed: isValid
-              ? () => _sendLinkAndSaveEmail(_emailCtrl.text, ctrl)
-              : null,
-          isLoading: loading,
-        ),
-      ],
-    );
-  }
-
-  Future<void> _sendLinkAndSaveEmail(String email, LoginController ctrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('pendingEmailForLink', email);
-    await ctrl.sendEmailLink(email);
-  }
-
-  // --- State D: email link sent ---
-
-  Widget _buildEmailLinkSent(String email, int countdown) {
-    final ctrl = ref.read<LoginController>(loginControllerProvider.notifier);
-    return EmailLinkSentView(
-      email: email,
-      resendCountdown: countdown,
-      onResend: () => ctrl.resendEmailLink(email),
     );
   }
 }

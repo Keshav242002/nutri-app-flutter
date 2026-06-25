@@ -55,15 +55,11 @@ extension LoginFormStatePatterns on LoginFormState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ChooseMethod value)?  chooseMethod,TResult Function( _EmailEntry value)?  emailEntry,TResult Function( _EmailLinkSending value)?  emailLinkSending,TResult Function( _EmailLinkSent value)?  emailLinkSent,TResult Function( _EmailLinkVerifying value)?  emailLinkVerifying,TResult Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult Function( _GoogleSigningIn value)?  googleSigningIn,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ChooseMethod value)?  chooseMethod,TResult Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult Function( _GoogleSigningIn value)?  googleSigningIn,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
-return chooseMethod(_that);case _EmailEntry() when emailEntry != null:
-return emailEntry(_that);case _EmailLinkSending() when emailLinkSending != null:
-return emailLinkSending(_that);case _EmailLinkSent() when emailLinkSent != null:
-return emailLinkSent(_that);case _EmailLinkVerifying() when emailLinkVerifying != null:
-return emailLinkVerifying(_that);case _EmailPasswordEntry() when emailPasswordEntry != null:
+return chooseMethod(_that);case _EmailPasswordEntry() when emailPasswordEntry != null:
 return emailPasswordEntry(_that);case _EmailPasswordSubmitting() when emailPasswordSubmitting != null:
 return emailPasswordSubmitting(_that);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn(_that);case _Success() when success != null:
@@ -86,15 +82,11 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ChooseMethod value)  chooseMethod,required TResult Function( _EmailEntry value)  emailEntry,required TResult Function( _EmailLinkSending value)  emailLinkSending,required TResult Function( _EmailLinkSent value)  emailLinkSent,required TResult Function( _EmailLinkVerifying value)  emailLinkVerifying,required TResult Function( _EmailPasswordEntry value)  emailPasswordEntry,required TResult Function( _EmailPasswordSubmitting value)  emailPasswordSubmitting,required TResult Function( _GoogleSigningIn value)  googleSigningIn,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ChooseMethod value)  chooseMethod,required TResult Function( _EmailPasswordEntry value)  emailPasswordEntry,required TResult Function( _EmailPasswordSubmitting value)  emailPasswordSubmitting,required TResult Function( _GoogleSigningIn value)  googleSigningIn,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod():
-return chooseMethod(_that);case _EmailEntry():
-return emailEntry(_that);case _EmailLinkSending():
-return emailLinkSending(_that);case _EmailLinkSent():
-return emailLinkSent(_that);case _EmailLinkVerifying():
-return emailLinkVerifying(_that);case _EmailPasswordEntry():
+return chooseMethod(_that);case _EmailPasswordEntry():
 return emailPasswordEntry(_that);case _EmailPasswordSubmitting():
 return emailPasswordSubmitting(_that);case _GoogleSigningIn():
 return googleSigningIn(_that);case _Success():
@@ -113,15 +105,11 @@ return error(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ChooseMethod value)?  chooseMethod,TResult? Function( _EmailEntry value)?  emailEntry,TResult? Function( _EmailLinkSending value)?  emailLinkSending,TResult? Function( _EmailLinkSent value)?  emailLinkSent,TResult? Function( _EmailLinkVerifying value)?  emailLinkVerifying,TResult? Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult? Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult? Function( _GoogleSigningIn value)?  googleSigningIn,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ChooseMethod value)?  chooseMethod,TResult? Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult? Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult? Function( _GoogleSigningIn value)?  googleSigningIn,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
-return chooseMethod(_that);case _EmailEntry() when emailEntry != null:
-return emailEntry(_that);case _EmailLinkSending() when emailLinkSending != null:
-return emailLinkSending(_that);case _EmailLinkSent() when emailLinkSent != null:
-return emailLinkSent(_that);case _EmailLinkVerifying() when emailLinkVerifying != null:
-return emailLinkVerifying(_that);case _EmailPasswordEntry() when emailPasswordEntry != null:
+return chooseMethod(_that);case _EmailPasswordEntry() when emailPasswordEntry != null:
 return emailPasswordEntry(_that);case _EmailPasswordSubmitting() when emailPasswordSubmitting != null:
 return emailPasswordSubmitting(_that);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn(_that);case _Success() when success != null:
@@ -143,14 +131,10 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  chooseMethod,TResult Function( String email,  bool isValid,  String? errorMessage)?  emailEntry,TResult Function( String email)?  emailLinkSending,TResult Function( String email,  int resendCountdown)?  emailLinkSent,TResult Function( String email)?  emailLinkVerifying,TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult Function( String email)?  emailPasswordSubmitting,TResult Function()?  googleSigningIn,TResult Function( User user)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  chooseMethod,TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult Function( String email)?  emailPasswordSubmitting,TResult Function()?  googleSigningIn,TResult Function( User user)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
-return chooseMethod();case _EmailEntry() when emailEntry != null:
-return emailEntry(_that.email,_that.isValid,_that.errorMessage);case _EmailLinkSending() when emailLinkSending != null:
-return emailLinkSending(_that.email);case _EmailLinkSent() when emailLinkSent != null:
-return emailLinkSent(_that.email,_that.resendCountdown);case _EmailLinkVerifying() when emailLinkVerifying != null:
-return emailLinkVerifying(_that.email);case _EmailPasswordEntry() when emailPasswordEntry != null:
+return chooseMethod();case _EmailPasswordEntry() when emailPasswordEntry != null:
 return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.errorMessage);case _EmailPasswordSubmitting() when emailPasswordSubmitting != null:
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn();case _Success() when success != null:
@@ -173,14 +157,10 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  chooseMethod,required TResult Function( String email,  bool isValid,  String? errorMessage)  emailEntry,required TResult Function( String email)  emailLinkSending,required TResult Function( String email,  int resendCountdown)  emailLinkSent,required TResult Function( String email)  emailLinkVerifying,required TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)  emailPasswordEntry,required TResult Function( String email)  emailPasswordSubmitting,required TResult Function()  googleSigningIn,required TResult Function( User user)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  chooseMethod,required TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)  emailPasswordEntry,required TResult Function( String email)  emailPasswordSubmitting,required TResult Function()  googleSigningIn,required TResult Function( User user)  success,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _ChooseMethod():
-return chooseMethod();case _EmailEntry():
-return emailEntry(_that.email,_that.isValid,_that.errorMessage);case _EmailLinkSending():
-return emailLinkSending(_that.email);case _EmailLinkSent():
-return emailLinkSent(_that.email,_that.resendCountdown);case _EmailLinkVerifying():
-return emailLinkVerifying(_that.email);case _EmailPasswordEntry():
+return chooseMethod();case _EmailPasswordEntry():
 return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.errorMessage);case _EmailPasswordSubmitting():
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn():
 return googleSigningIn();case _Success():
@@ -199,14 +179,10 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  chooseMethod,TResult? Function( String email,  bool isValid,  String? errorMessage)?  emailEntry,TResult? Function( String email)?  emailLinkSending,TResult? Function( String email,  int resendCountdown)?  emailLinkSent,TResult? Function( String email)?  emailLinkVerifying,TResult? Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult? Function( String email)?  emailPasswordSubmitting,TResult? Function()?  googleSigningIn,TResult? Function( User user)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  chooseMethod,TResult? Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult? Function( String email)?  emailPasswordSubmitting,TResult? Function()?  googleSigningIn,TResult? Function( User user)?  success,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
-return chooseMethod();case _EmailEntry() when emailEntry != null:
-return emailEntry(_that.email,_that.isValid,_that.errorMessage);case _EmailLinkSending() when emailLinkSending != null:
-return emailLinkSending(_that.email);case _EmailLinkSent() when emailLinkSent != null:
-return emailLinkSent(_that.email,_that.resendCountdown);case _EmailLinkVerifying() when emailLinkVerifying != null:
-return emailLinkVerifying(_that.email);case _EmailPasswordEntry() when emailPasswordEntry != null:
+return chooseMethod();case _EmailPasswordEntry() when emailPasswordEntry != null:
 return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.errorMessage);case _EmailPasswordSubmitting() when emailPasswordSubmitting != null:
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn();case _Success() when success != null:
@@ -250,276 +226,6 @@ String toString() {
 
 
 
-
-/// @nodoc
-
-
-class _EmailEntry implements LoginFormState {
-  const _EmailEntry({required this.email, required this.isValid, this.errorMessage});
-  
-
- final  String email;
- final  bool isValid;
- final  String? errorMessage;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$EmailEntryCopyWith<_EmailEntry> get copyWith => __$EmailEntryCopyWithImpl<_EmailEntry>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmailEntry&&(identical(other.email, email) || other.email == email)&&(identical(other.isValid, isValid) || other.isValid == isValid)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,email,isValid,errorMessage);
-
-@override
-String toString() {
-  return 'LoginFormState.emailEntry(email: $email, isValid: $isValid, errorMessage: $errorMessage)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$EmailEntryCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
-  factory _$EmailEntryCopyWith(_EmailEntry value, $Res Function(_EmailEntry) _then) = __$EmailEntryCopyWithImpl;
-@useResult
-$Res call({
- String email, bool isValid, String? errorMessage
-});
-
-
-
-
-}
-/// @nodoc
-class __$EmailEntryCopyWithImpl<$Res>
-    implements _$EmailEntryCopyWith<$Res> {
-  __$EmailEntryCopyWithImpl(this._self, this._then);
-
-  final _EmailEntry _self;
-  final $Res Function(_EmailEntry) _then;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? email = null,Object? isValid = null,Object? errorMessage = freezed,}) {
-  return _then(_EmailEntry(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,isValid: null == isValid ? _self.isValid : isValid // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _EmailLinkSending implements LoginFormState {
-  const _EmailLinkSending({required this.email});
-  
-
- final  String email;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$EmailLinkSendingCopyWith<_EmailLinkSending> get copyWith => __$EmailLinkSendingCopyWithImpl<_EmailLinkSending>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmailLinkSending&&(identical(other.email, email) || other.email == email));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,email);
-
-@override
-String toString() {
-  return 'LoginFormState.emailLinkSending(email: $email)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$EmailLinkSendingCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
-  factory _$EmailLinkSendingCopyWith(_EmailLinkSending value, $Res Function(_EmailLinkSending) _then) = __$EmailLinkSendingCopyWithImpl;
-@useResult
-$Res call({
- String email
-});
-
-
-
-
-}
-/// @nodoc
-class __$EmailLinkSendingCopyWithImpl<$Res>
-    implements _$EmailLinkSendingCopyWith<$Res> {
-  __$EmailLinkSendingCopyWithImpl(this._self, this._then);
-
-  final _EmailLinkSending _self;
-  final $Res Function(_EmailLinkSending) _then;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? email = null,}) {
-  return _then(_EmailLinkSending(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _EmailLinkSent implements LoginFormState {
-  const _EmailLinkSent({required this.email, required this.resendCountdown});
-  
-
- final  String email;
- final  int resendCountdown;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$EmailLinkSentCopyWith<_EmailLinkSent> get copyWith => __$EmailLinkSentCopyWithImpl<_EmailLinkSent>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmailLinkSent&&(identical(other.email, email) || other.email == email)&&(identical(other.resendCountdown, resendCountdown) || other.resendCountdown == resendCountdown));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,email,resendCountdown);
-
-@override
-String toString() {
-  return 'LoginFormState.emailLinkSent(email: $email, resendCountdown: $resendCountdown)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$EmailLinkSentCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
-  factory _$EmailLinkSentCopyWith(_EmailLinkSent value, $Res Function(_EmailLinkSent) _then) = __$EmailLinkSentCopyWithImpl;
-@useResult
-$Res call({
- String email, int resendCountdown
-});
-
-
-
-
-}
-/// @nodoc
-class __$EmailLinkSentCopyWithImpl<$Res>
-    implements _$EmailLinkSentCopyWith<$Res> {
-  __$EmailLinkSentCopyWithImpl(this._self, this._then);
-
-  final _EmailLinkSent _self;
-  final $Res Function(_EmailLinkSent) _then;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? email = null,Object? resendCountdown = null,}) {
-  return _then(_EmailLinkSent(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,resendCountdown: null == resendCountdown ? _self.resendCountdown : resendCountdown // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class _EmailLinkVerifying implements LoginFormState {
-  const _EmailLinkVerifying({required this.email});
-  
-
- final  String email;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$EmailLinkVerifyingCopyWith<_EmailLinkVerifying> get copyWith => __$EmailLinkVerifyingCopyWithImpl<_EmailLinkVerifying>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmailLinkVerifying&&(identical(other.email, email) || other.email == email));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,email);
-
-@override
-String toString() {
-  return 'LoginFormState.emailLinkVerifying(email: $email)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$EmailLinkVerifyingCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
-  factory _$EmailLinkVerifyingCopyWith(_EmailLinkVerifying value, $Res Function(_EmailLinkVerifying) _then) = __$EmailLinkVerifyingCopyWithImpl;
-@useResult
-$Res call({
- String email
-});
-
-
-
-
-}
-/// @nodoc
-class __$EmailLinkVerifyingCopyWithImpl<$Res>
-    implements _$EmailLinkVerifyingCopyWith<$Res> {
-  __$EmailLinkVerifyingCopyWithImpl(this._self, this._then);
-
-  final _EmailLinkVerifying _self;
-  final $Res Function(_EmailLinkVerifying) _then;
-
-/// Create a copy of LoginFormState
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? email = null,}) {
-  return _then(_EmailLinkVerifying(
-email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
-
-}
 
 /// @nodoc
 

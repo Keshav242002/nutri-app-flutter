@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:ahara/core/network/api_exceptions.dart';
+import 'package:ahara/core/notifications/push_messaging_service.dart';
 import 'package:ahara/features/auth/data/auth_repository.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
 import 'package:ahara/features/auth/domain/models/user_model.dart';
 import 'package:ahara/features/auth/providers.dart';
+import 'package:ahara/features/dashboard/presentation/controllers/dashboard_controller.dart';
+import 'package:ahara/features/notifications/presentation/controllers/push_settings_controller.dart';
+import 'package:ahara/features/notifications/presentation/controllers/unread_count_controller.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -20,7 +25,19 @@ class AuthController extends _$AuthController {
   Future<AuthState> build() async {
     final fbUser = await fb.FirebaseAuth.instance.authStateChanges().first;
     if (fbUser == null) return const AuthState.unauthenticated();
-    return _loadUser(ref.read(authRepositoryProvider), fbUser);
+    final authState = await _loadUser(ref.read(authRepositoryProvider), fbUser);
+    authState.maybeWhen(
+      authenticated: (_) => unawaited(_onAuthenticated()),
+      orElse: () {},
+    );
+    return authState;
+  }
+
+  /// Initializes push messaging and registers the FCM token if the user has
+  /// opted in. Safe to call on every authenticated session.
+  Future<void> _onAuthenticated() async {
+    await ref.read(pushMessagingServiceProvider).init();
+    await ref.read(pushSettingsControllerProvider.notifier).initOnLaunch();
   }
 
   /// Refreshes user from the backend and updates state.
@@ -50,8 +67,20 @@ class AuthController extends _$AuthController {
 
   /// Signs the user out and resets state to unauthenticated.
   Future<void> signOut() async {
+    // Unregister the FCM token while the session is still valid (the DELETE
+    // needs the auth header).
+    await ref
+        .read(pushSettingsControllerProvider.notifier)
+        .unregisterOnSignOut();
     await ref.read(authRepositoryProvider).signOut();
     state = const AsyncData(AuthState.unauthenticated());
+
+    // Clear the previous user's cached state so the next account doesn't see
+    // it. These are keepAlive providers, so they survive navigation and would
+    // otherwise leak across accounts until an app restart.
+    ref
+      ..invalidate(dashboardControllerProvider)
+      ..invalidate(unreadCountControllerProvider);
   }
 
   /// Immediately marks the session as authenticated with [user].
@@ -60,6 +89,7 @@ class AuthController extends _$AuthController {
   /// correct state before navigation fires.
   void setAuthenticated(User user) {
     state = AsyncData(AuthState.authenticated(user));
+    unawaited(_onAuthenticated());
   }
 
   /// Returns the authenticated [User] or `null`.

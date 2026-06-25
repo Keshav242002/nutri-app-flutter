@@ -8,9 +8,15 @@ import 'package:ahara/features/auth/presentation/screens/onboarding_slides_scree
 import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
 import 'package:ahara/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:ahara/features/dashboard/presentation/screens/recipe_detail_screen.dart';
+import 'package:ahara/features/dashboard/presentation/screens/tomorrow_preview_screen.dart';
+import 'package:ahara/features/notifications/presentation/screens/notifications_list_screen.dart';
 import 'package:ahara/features/onboarding/domain/models/dietary_profile.dart';
 import 'package:ahara/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:ahara/features/onboarding/presentation/screens/your_plan_screen.dart';
+import 'package:ahara/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:ahara/features/profile/presentation/screens/monthly_report_screen.dart';
+import 'package:ahara/features/profile/presentation/screens/notifications_screen.dart';
+import 'package:ahara/features/profile/presentation/screens/profile_screen.dart';
 import 'package:ahara/features/week/presentation/screens/week_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -172,6 +178,16 @@ GoRouter appRouter(Ref ref) {
                       return _fadePage(RecipeDetailScreen(slug: slug));
                     },
                   ),
+                  GoRoute(
+                    path: 'notifications',
+                    pageBuilder: (_, __) =>
+                        _fadePage(const NotificationsListScreen()),
+                  ),
+                  GoRoute(
+                    path: 'tomorrow',
+                    pageBuilder: (_, __) =>
+                        _fadePage(const TomorrowPreviewScreen()),
+                  ),
                 ],
               ),
             ],
@@ -197,8 +213,24 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.profile,
-                pageBuilder: (_, __) =>
-                    _fadePage(const _PlaceholderScreen(label: 'Profile')),
+                pageBuilder: (_, __) => _fadePage(const ProfileScreen()),
+                routes: [
+                  GoRoute(
+                    path: 'edit',
+                    pageBuilder: (_, __) =>
+                        _fadePage(const EditProfileScreen()),
+                  ),
+                  GoRoute(
+                    path: 'report',
+                    pageBuilder: (_, __) =>
+                        _fadePage(const MonthlyReportScreen()),
+                  ),
+                  GoRoute(
+                    path: 'notifications',
+                    pageBuilder: (_, __) =>
+                        _fadePage(const NotificationsScreen()),
+                  ),
+                ],
               ),
             ],
           ),
