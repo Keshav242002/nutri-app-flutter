@@ -1,3 +1,4 @@
+import 'package:ahara/core/cache/cache_service.dart';
 import 'package:ahara/core/network/api_client.dart';
 import 'package:ahara/features/profile/data/profile_remote_datasource.dart';
 import 'package:ahara/features/profile/data/profile_repository.dart';
@@ -12,5 +13,7 @@ ProfileRemoteDataSource profileRemoteDataSource(Ref ref) =>
 
 /// Provides the [ProfileRepository].
 @riverpod
-ProfileRepository profileRepository(Ref ref) =>
-    ProfileRepository(dataSource: ref.read(profileRemoteDataSourceProvider));
+ProfileRepository profileRepository(Ref ref) => ProfileRepository(
+      dataSource: ref.read(profileRemoteDataSourceProvider),
+      cache: ref.read(cacheServiceProvider),
+    );

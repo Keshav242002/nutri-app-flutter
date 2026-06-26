@@ -1,3 +1,4 @@
+import 'package:ahara/core/analytics/analytics_service.dart';
 import 'package:ahara/core/routing/route_paths.dart';
 import 'package:ahara/core/widgets/app_bottom_nav.dart';
 import 'package:ahara/features/auth/domain/models/auth_state.dart';
@@ -6,6 +7,7 @@ import 'package:ahara/features/auth/presentation/controllers/auth_controller.dar
 import 'package:ahara/features/auth/presentation/screens/login_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/onboarding_slides_screen.dart';
 import 'package:ahara/features/auth/presentation/screens/splash_screen.dart';
+import 'package:ahara/features/chat/presentation/screens/chat_screen.dart';
 import 'package:ahara/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:ahara/features/dashboard/presentation/screens/recipe_detail_screen.dart';
 import 'package:ahara/features/dashboard/presentation/screens/tomorrow_preview_screen.dart';
@@ -23,21 +25,6 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
-
-// ---------------------------------------------------------------------------
-// Placeholder screens — replaced in later features.
-// ---------------------------------------------------------------------------
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text(label)));
-  }
-}
 
 /// Shell wrapping the bottom-nav tabs.
 class _ShellScreen extends StatelessWidget {
@@ -84,10 +71,18 @@ class RouterErrorPage extends StatelessWidget {
 
 /// All route changes use a plain crossfade to avoid platform-default slide /
 /// fade-up transitions that flash white between screens.
-CustomTransitionPage<void> _fadePage(Widget child) =>
+///
+/// [key] MUST be `state.pageKey`. Without a stable key, every Router rebuild
+/// (e.g. the auth `refreshListenable` firing, or a branch restore) creates a
+/// fresh keyless [CustomTransitionPage] that the Navigator cannot match to the
+/// existing route entry, so it remounts the screen — which disposes and
+/// re-creates any autoDispose providers it watches, causing an infinite
+/// refetch loop on detail screens. The stable key makes the page update in
+/// place instead of remounting.
+CustomTransitionPage<void> _fadePage(Widget child, {required LocalKey key}) =>
     CustomTransitionPage<void>(
+      key: key,
       child: child,
-
       transitionsBuilder: (_, animation, __, child) =>
           FadeTransition(opacity: animation, child: child),
     );
@@ -123,7 +118,7 @@ GoRouter appRouter(Ref ref) {
     })
     ..onDispose(notifier.dispose);
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: RoutePaths.splash,
     debugLogDiagnostics: true,
     refreshListenable: notifier,
@@ -133,19 +128,23 @@ GoRouter appRouter(Ref ref) {
     routes: [
       GoRoute(
         path: RoutePaths.splash,
-        pageBuilder: (_, __) => _fadePage(const SplashScreen()),
+        pageBuilder: (_, state) =>
+            _fadePage(const SplashScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: RoutePaths.onboardingIntro,
-        pageBuilder: (_, __) => _fadePage(const OnboardingSlidesScreen()),
+        pageBuilder: (_, state) =>
+            _fadePage(const OnboardingSlidesScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: RoutePaths.login,
-        pageBuilder: (_, __) => _fadePage(const LoginScreen()),
+        pageBuilder: (_, state) =>
+            _fadePage(const LoginScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: RoutePaths.onboarding,
-        pageBuilder: (_, __) => _fadePage(const OnboardingScreen()),
+        pageBuilder: (_, state) =>
+            _fadePage(const OnboardingScreen(), key: state.pageKey),
       ),
       GoRoute(
         path: RoutePaths.yourPlan,
@@ -159,7 +158,10 @@ GoRouter appRouter(Ref ref) {
             // state from serialized form, turning the extra into a plain Map.
             profile = DietaryProfile.fromJson(extra! as Map<String, dynamic>);
           }
-          return _fadePage(YourPlanScreen(profile: profile));
+          return _fadePage(
+            YourPlanScreen(profile: profile),
+            key: state.pageKey,
+          );
         },
       ),
       StatefulShellRoute.indexedStack(
@@ -169,24 +171,32 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.home,
-                pageBuilder: (_, __) => _fadePage(const DashboardScreen()),
+                pageBuilder: (_, state) =>
+                    _fadePage(const DashboardScreen(), key: state.pageKey),
                 routes: [
                   GoRoute(
                     path: 'recipe/:slug',
                     pageBuilder: (_, state) {
                       final slug = state.pathParameters['slug']!;
-                      return _fadePage(RecipeDetailScreen(slug: slug));
+                      return _fadePage(
+                        RecipeDetailScreen(slug: slug),
+                        key: state.pageKey,
+                      );
                     },
                   ),
                   GoRoute(
                     path: 'notifications',
-                    pageBuilder: (_, __) =>
-                        _fadePage(const NotificationsListScreen()),
+                    pageBuilder: (_, state) => _fadePage(
+                      const NotificationsListScreen(),
+                      key: state.pageKey,
+                    ),
                   ),
                   GoRoute(
                     path: 'tomorrow',
-                    pageBuilder: (_, __) =>
-                        _fadePage(const TomorrowPreviewScreen()),
+                    pageBuilder: (_, state) => _fadePage(
+                      const TomorrowPreviewScreen(),
+                      key: state.pageKey,
+                    ),
                   ),
                 ],
               ),
@@ -196,16 +206,29 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.recipes,
-                pageBuilder: (_, __) => _fadePage(const WeekScreen()),
+                pageBuilder: (_, state) =>
+                    _fadePage(const WeekScreen(), key: state.pageKey),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: RoutePaths.tracker,
-                pageBuilder: (_, __) =>
-                    _fadePage(const _PlaceholderScreen(label: 'Tracker')),
+                path: RoutePaths.chat,
+                pageBuilder: (_, state) =>
+                    _fadePage(const ChatScreen(), key: state.pageKey),
+                routes: [
+                  GoRoute(
+                    path: 'recipe/:slug',
+                    pageBuilder: (_, state) {
+                      final slug = state.pathParameters['slug']!;
+                      return _fadePage(
+                        RecipeDetailScreen(slug: slug),
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -213,22 +236,29 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: RoutePaths.profile,
-                pageBuilder: (_, __) => _fadePage(const ProfileScreen()),
+                pageBuilder: (_, state) =>
+                    _fadePage(const ProfileScreen(), key: state.pageKey),
                 routes: [
                   GoRoute(
                     path: 'edit',
-                    pageBuilder: (_, __) =>
-                        _fadePage(const EditProfileScreen()),
+                    pageBuilder: (_, state) => _fadePage(
+                      const EditProfileScreen(),
+                      key: state.pageKey,
+                    ),
                   ),
                   GoRoute(
                     path: 'report',
-                    pageBuilder: (_, __) =>
-                        _fadePage(const MonthlyReportScreen()),
+                    pageBuilder: (_, state) => _fadePage(
+                      const MonthlyReportScreen(),
+                      key: state.pageKey,
+                    ),
                   ),
                   GoRoute(
                     path: 'notifications',
-                    pageBuilder: (_, __) =>
-                        _fadePage(const NotificationsScreen()),
+                    pageBuilder: (_, state) => _fadePage(
+                      const NotificationsScreen(),
+                      key: state.pageKey,
+                    ),
                   ),
                 ],
               ),
@@ -238,6 +268,26 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
+
+  // Log a `screen_viewed_<route>` event on every navigation. Reading the
+  // delegate's current location here covers tab switches, pushes, and
+  // redirects from a single place.
+  final analytics = ref.read(analyticsServiceProvider);
+  String? lastLogged;
+  void logCurrentRoute() {
+    final location = router.routerDelegate.currentConfiguration.uri.path;
+    if (location.isEmpty || location == lastLogged) return;
+    lastLogged = location;
+    analytics.logScreenView(location);
+  }
+
+  logCurrentRoute();
+  router.routerDelegate.addListener(logCurrentRoute);
+  ref.onDispose(
+    () => router.routerDelegate.removeListener(logCurrentRoute),
+  );
+
+  return router;
 }
 
 // ---------------------------------------------------------------------------

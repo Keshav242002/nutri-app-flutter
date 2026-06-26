@@ -10,8 +10,12 @@ part 'recipe_detail_controller.g.dart';
 class RecipeDetailController extends _$RecipeDetailController {
   @override
   Future<RecipeDetail> build(String slug) async {
+    // Use read, not watch: the repository is a stateless service. Watching it
+    // re-runs build whenever the autoDispose repo provider churns (which it
+    // does when the dashboard tab isn't mounted, e.g. opened from the chat
+    // tab), causing an infinite refetch loop. Refresh is via invalidateSelf.
     final result =
-        await ref.watch(dashboardRepositoryProvider).getRecipeDetail(slug);
+        await ref.read(dashboardRepositoryProvider).getRecipeDetail(slug);
     return result.when(
       success: (RecipeDetail data) => data,
       failure: (AppException e) => throw e,

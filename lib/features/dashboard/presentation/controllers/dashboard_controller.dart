@@ -1,3 +1,4 @@
+import 'package:ahara/core/connectivity/connectivity_provider.dart';
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/providers/meal_plan_sync_provider.dart';
 import 'package:ahara/core/providers/toast_provider.dart';
@@ -43,7 +44,10 @@ class DashboardController extends _$DashboardController {
       ..listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision())
       // A meal swapped on any screen (e.g. the week tab) bumps this revision;
       // refetch today's plan so the meal cards reflect the new recipe.
-      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision());
+      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision())
+      // When connectivity is restored, refetch everything from the network so
+      // the cached view shown while offline is replaced with fresh data.
+      ..listen(onlineRefreshProvider, (_, __) => ref.invalidateSelf());
 
     final repo = ref.read(dashboardRepositoryProvider);
     final today = _today();

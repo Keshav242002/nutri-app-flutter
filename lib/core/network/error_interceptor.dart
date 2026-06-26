@@ -48,9 +48,20 @@ class ErrorInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         return _mapResponse(err.response);
 
+      case DioExceptionType.unknown:
+        // A response was received but Dio could not turn it into the expected
+        // JSON map — almost always the server replied with a non-JSON body
+        // (e.g. a 5xx HTML error page), which surfaces here as a
+        // FormatException rather than a badResponse. Treat it as a server
+        // error so the user sees an accurate message instead of a vague
+        // "unexpected error".
+        if (err.error is FormatException || err.response != null) {
+          return const ServerException();
+        }
+        return const UnknownException();
+
       case DioExceptionType.cancel:
       case DioExceptionType.badCertificate:
-      case DioExceptionType.unknown:
         return const UnknownException();
     }
   }

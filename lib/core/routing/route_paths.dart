@@ -21,8 +21,11 @@ abstract final class RoutePaths {
   /// Recipe browser (stubbed in v1, promoted in v1.1).
   static const recipes = '/recipes';
 
-  /// Daily food tracker screen.
-  static const tracker = '/tracker';
+  /// AI chat tab.
+  static const chat = '/chat';
+
+  /// Recipe detail opened from a chat inline card — sub-route of the chat tab.
+  static const chatRecipeDetail = '/chat/recipe/:slug';
 
   /// User profile screen.
   static const profile = '/profile';

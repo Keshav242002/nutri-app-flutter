@@ -1,6 +1,7 @@
 import 'package:ahara/core/routing/app_router.dart';
 import 'package:ahara/core/theme/app_theme.dart';
 import 'package:ahara/core/widgets/app_toast.dart';
+import 'package:ahara/core/widgets/offline_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,8 +23,9 @@ class AharaApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: router,
-      builder: (context, child) =>
-          ToastOverlay(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) => OfflineBannerOverlay(
+        child: ToastOverlay(child: child ?? const SizedBox.shrink()),
+      ),
     );
   }
 }

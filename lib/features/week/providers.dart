@@ -1,3 +1,4 @@
+import 'package:ahara/core/cache/cache_service.dart';
 import 'package:ahara/core/network/api_client.dart';
 import 'package:ahara/features/week/data/week_remote_datasource.dart';
 import 'package:ahara/features/week/data/week_repository.dart';
@@ -12,5 +13,7 @@ WeekRemoteDatasource weekRemoteDatasource(Ref ref) =>
 
 /// Provides the [WeekRepository].
 @riverpod
-WeekRepository weekRepository(Ref ref) =>
-    WeekRepository(ref.read(weekRemoteDatasourceProvider));
+WeekRepository weekRepository(Ref ref) => WeekRepository(
+      ref.read(weekRemoteDatasourceProvider),
+      ref.read(cacheServiceProvider),
+    );

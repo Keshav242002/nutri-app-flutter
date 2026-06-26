@@ -1,4 +1,6 @@
+import 'package:ahara/core/analytics/analytics_service.dart';
 import 'package:ahara/core/config/env.dart';
+import 'package:ahara/core/network/analytics_interceptor.dart';
 import 'package:ahara/core/network/auth_interceptor.dart';
 import 'package:ahara/core/network/error_interceptor.dart';
 import 'package:dio/dio.dart';
@@ -31,6 +33,7 @@ Dio apiClient(Ref ref) {
   dio.interceptors.addAll([
     AuthInterceptor(),
     ErrorInterceptor(),
+    AnalyticsInterceptor(ref.read(analyticsServiceProvider)),
     if (kDebugMode) LogInterceptor(requestBody: true, responseBody: true),
   ]);
 

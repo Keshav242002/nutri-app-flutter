@@ -1,3 +1,5 @@
+import 'package:ahara/core/cache/cache_service.dart';
+import 'package:ahara/core/cache/cached_fetch.dart';
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/utils/result.dart';
 import 'package:ahara/features/dashboard/domain/models/log_meal_request.dart';
@@ -14,32 +16,61 @@ import 'package:dio/dio.dart';
 /// All methods return [Result<T>] — no raw exceptions escape this layer.
 class WeekRepository {
   /// Creates a [WeekRepository].
-  const WeekRepository(this._ds);
+  const WeekRepository(this._ds, this._cache);
 
   final WeekRemoteDatasource _ds;
+  final CacheService _cache;
 
-  /// Fetches meal plans for the ISO week starting at [from].
+  /// Fetches meal plans for the ISO week starting at [from]. Cached.
   Future<Result<List<WeekMealDay>>> getWeekMealPlans(String from) =>
-      _wrap(() => _ds.fetchWeekMealPlans(from));
+      cachedFetchList(
+        cache: _cache,
+        key: 'week:plans:$from',
+        fetch: () => _ds.fetchWeekMealPlans(from),
+        toJson: (v) => v.toJson(),
+        fromJson: WeekMealDay.fromJson,
+      );
 
-  /// Fetches per-day nutrition summaries for [from]–[to].
+  /// Fetches per-day nutrition summaries for [from]–[to]. Cached.
   Future<Result<WeeklyNutrition>> getWeeklyNutrition(
     String from,
     String to,
   ) =>
-      _wrap(() => _ds.fetchWeeklyNutrition(from, to));
+      cachedFetch(
+        cache: _cache,
+        key: 'week:nutrition:$from:$to',
+        fetch: () => _ds.fetchWeeklyNutrition(from, to),
+        // WeeklyNutrition has a custom fromJson (no generated toJson) — encode
+        // it in the same shape WeeklyNutrition.fromJson expects.
+        toJson: (v) => {
+          'days': v.days.map((d) => d.toJson()).toList(),
+          'averages': v.averages?.toJson() ?? <String, dynamic>{},
+        },
+        fromJson: WeeklyNutrition.fromJson,
+      );
 
-  /// Fetches the grocery list for the week containing [planDate].
-  Future<Result<GroceryList>> getGroceryList(String planDate) =>
-      _wrap(() => _ds.fetchGroceryList(planDate));
+  /// Fetches the grocery list for the week containing [planDate]. Cached.
+  Future<Result<GroceryList>> getGroceryList(String planDate) => cachedFetch(
+        cache: _cache,
+        key: 'week:grocery:$planDate',
+        fetch: () => _ds.fetchGroceryList(planDate),
+        toJson: (v) => v.toJson(),
+        fromJson: GroceryList.fromJson,
+      );
 
   /// Force-recomputes and returns the grocery list for [planDate].
   Future<Result<GroceryList>> refreshGroceryList(String planDate) =>
       _wrap(() => _ds.regenerateGroceryList(planDate));
 
-  /// Fetches meal logs for a specific [date].
+  /// Fetches meal logs for a specific [date]. Cached.
   Future<Result<List<MealLog>>> getLogsForDate(String date) =>
-      _wrap(() => _ds.fetchLogsForDate(date));
+      cachedFetchList(
+        cache: _cache,
+        key: 'week:logs:$date',
+        fetch: () => _ds.fetchLogsForDate(date),
+        toJson: (v) => v.toJson(),
+        fromJson: MealLog.fromJson,
+      );
 
   /// Posts a meal log entry.
   Future<Result<MealLog>> logMeal(LogMealRequest request) =>

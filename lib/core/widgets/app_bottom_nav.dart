@@ -10,8 +10,8 @@ abstract final class AppNavTab {
   /// Recipes tab index.
   static const int recipes = 1;
 
-  /// Tracker tab index.
-  static const int tracker = 2;
+  /// Chat tab index.
+  static const int chat = 2;
 
   /// Profile tab index.
   static const int profile = 3;
