@@ -72,6 +72,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Stack(
         children: [
           const SizedBox.expand(child: ColoredBox(color: AppColors.navyDeep)),
+          // Brand logo centered in the empty navy area above the sheet.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: size.height * 0.45,
+            child: Center(
+              child: Image.asset(
+                'assets/logo_dark.png',
+                width: size.width * 0.5,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,

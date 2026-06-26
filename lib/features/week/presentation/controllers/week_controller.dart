@@ -1,3 +1,4 @@
+import 'package:ahara/core/connectivity/connectivity_provider.dart';
 import 'package:ahara/core/providers/meal_plan_sync_provider.dart';
 import 'package:ahara/core/providers/toast_provider.dart';
 import 'package:ahara/core/providers/tracker_sync_provider.dart';
@@ -32,7 +33,9 @@ class WeekController extends _$WeekController {
       ..listen(trackerLogRevisionProvider, (_, __) => _syncFromRevision())
       // A meal swapped on any screen (e.g. the home tab) bumps this revision;
       // refetch the displayed week's plans so day cards show the new recipe.
-      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision());
+      ..listen(mealPlanRevisionProvider, (_, __) => _syncPlanFromRevision())
+      // On reconnect, refetch everything so cached offline data is refreshed.
+      ..listen(onlineRefreshProvider, (_, __) => ref.invalidateSelf());
 
     final repo = ref.read(weekRepositoryProvider);
     final now = DateTime.now();

@@ -65,5 +65,8 @@ claude-flow.config.json
 settings.json
 ruvector.db
 *.db
+*.db-shm
+*.db-wal
+log.txt
 CLAUDE.md
 CLAUDE.local.md

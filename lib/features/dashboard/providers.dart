@@ -1,3 +1,4 @@
+import 'package:ahara/core/cache/cache_service.dart';
 import 'package:ahara/core/network/api_client.dart';
 import 'package:ahara/features/dashboard/data/dashboard_remote_datasource.dart';
 import 'package:ahara/features/dashboard/data/dashboard_repository.dart';
@@ -12,5 +13,7 @@ DashboardRemoteDataSource dashboardRemoteDataSource(Ref ref) =>
 
 /// Provides the [DashboardRepository].
 @riverpod
-DashboardRepository dashboardRepository(Ref ref) =>
-    DashboardRepository(ref.read(dashboardRemoteDataSourceProvider));
+DashboardRepository dashboardRepository(Ref ref) => DashboardRepository(
+      ref.read(dashboardRemoteDataSourceProvider),
+      ref.read(cacheServiceProvider),
+    );

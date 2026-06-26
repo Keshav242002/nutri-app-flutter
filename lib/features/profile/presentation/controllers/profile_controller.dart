@@ -1,3 +1,4 @@
+import 'package:ahara/core/connectivity/connectivity_provider.dart';
 import 'package:ahara/features/onboarding/domain/models/dietary_profile.dart';
 import 'package:ahara/features/profile/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -12,6 +13,9 @@ part 'profile_controller.g.dart';
 class ProfileController extends _$ProfileController {
   @override
   Future<DietaryProfile> build() async {
+    // On reconnect, refetch the profile so cached offline data is refreshed.
+    ref.listen(onlineRefreshProvider, (_, __) => ref.invalidateSelf());
+
     final result = await ref.read(profileRepositoryProvider).getMe();
     return result.when(
       success: (DietaryProfile p) => p,

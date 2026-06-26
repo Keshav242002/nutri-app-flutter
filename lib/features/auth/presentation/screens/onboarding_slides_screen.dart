@@ -81,15 +81,22 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
           const SizedBox.expand(child: ColoredBox(color: AppColors.navyDeep)),
 
           // Image panel — full bleed top zone.
+          //
+          // Carousel "push": the outgoing image exits LEFT exactly as the
+          // incoming one enters from the RIGHT, so their edges stay touching
+          // and the navy background is never revealed mid-transition.
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, anim) => SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1, 0),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(parent: anim, curve: Curves.easeInOut)),
-              child: child,
+            duration: const Duration(milliseconds: 450),
+            // Stack children to fill the box so both slides overlap the panel.
+            layoutBuilder: (currentChild, previousChildren) => Stack(
+              fit: StackFit.expand,
+              children: [
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
             ),
+            transitionBuilder: (child, anim) =>
+                _imagePush(child, anim, ValueKey(_index)),
             child: SizedBox(
               key: ValueKey(_index),
               width: double.infinity,
@@ -116,23 +123,11 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
                   _ProgressPills(current: _index),
                   const SizedBox(height: 28),
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    transitionBuilder: (child, anim) => FadeTransition(
-                      opacity: anim,
-                      child: SlideTransition(
-                        position:
-                            Tween<Offset>(
-                              begin: const Offset(0.05, 0),
-                              end: Offset.zero,
-                            ).animate(
-                              CurvedAnimation(
-                                parent: anim,
-                                curve: Curves.easeOut,
-                              ),
-                            ),
-                        child: child,
-                      ),
-                    ),
+                    duration: const Duration(milliseconds: 450),
+                    // Mirror the image's push direction (with a fade) so the
+                    // text and image read as one moving unit.
+                    transitionBuilder: (child, anim) =>
+                        _textPush(child, anim, ValueKey(_index)),
                     child: OnboardingSlide(
                       key: ValueKey(_index),
                       data: _slides[_index],
@@ -146,6 +141,37 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Carousel push for the image panel.
+  ///
+  /// Incoming child (matches the active [activeKey]) rides in from the right
+  /// (+1 → 0); the outgoing child travels the same way, exiting to the left
+  /// (0 → -1, since [AnimatedSwitcher] runs its animation in reverse). Both
+  /// stay edge-to-edge, so the navy backdrop is never exposed. [ClipRect]
+  /// keeps either slide from bleeding past the panel during travel.
+  Widget _imagePush(Widget child, Animation<double> anim, Key activeKey) {
+    final isIncoming = child.key == activeKey;
+    final offset = Tween<Offset>(
+      begin: Offset(isIncoming ? 1 : -1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: anim, curve: Curves.easeInOut));
+    return ClipRect(child: SlideTransition(position: offset, child: child));
+  }
+
+  /// Same directional push as [_imagePush] but gentler (smaller travel) and
+  /// cross-faded, so the text sheet reads as part of the same motion.
+  Widget _textPush(Widget child, Animation<double> anim, Key activeKey) {
+    final isIncoming = child.key == activeKey;
+    final curved = CurvedAnimation(parent: anim, curve: Curves.easeOut);
+    final offset = Tween<Offset>(
+      begin: Offset(isIncoming ? 0.25 : -0.25, 0),
+      end: Offset.zero,
+    ).animate(curved);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(position: offset, child: child),
     );
   }
 
