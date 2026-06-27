@@ -8,9 +8,15 @@ part of 'today_meal_plan.dart';
 
 _TodayMealPlan _$TodayMealPlanFromJson(Map<String, dynamic> json) =>
     _TodayMealPlan(
-      breakfast: RecipeSlim.fromJson(json['breakfast'] as Map<String, dynamic>),
-      lunch: RecipeSlim.fromJson(json['lunch'] as Map<String, dynamic>),
-      dinner: RecipeSlim.fromJson(json['dinner'] as Map<String, dynamic>),
+      breakfast: json['breakfast'] == null
+          ? RecipeSlim.fromJson(const {})
+          : RecipeSlim.fromJson(json['breakfast'] as Map<String, dynamic>),
+      lunch: json['lunch'] == null
+          ? RecipeSlim.fromJson(const {})
+          : RecipeSlim.fromJson(json['lunch'] as Map<String, dynamic>),
+      dinner: json['dinner'] == null
+          ? RecipeSlim.fromJson(const {})
+          : RecipeSlim.fromJson(json['dinner'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$TodayMealPlanToJson(_TodayMealPlan instance) =>

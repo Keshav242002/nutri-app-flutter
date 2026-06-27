@@ -18,7 +18,7 @@ class NotificationItem {
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
     final readAtRaw = json['read_at'] as String?;
     return NotificationItem(
-      id: json['id'] as int,
+      id: (json['id'] as num?)?.toInt() ?? 0,
       category: json['category'] as String? ?? '',
       title: json['title'] as String? ?? '',
       body: json['body'] as String? ?? '',

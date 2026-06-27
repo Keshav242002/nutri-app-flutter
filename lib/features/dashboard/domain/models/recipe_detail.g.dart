@@ -10,7 +10,7 @@ _RecipeIngredient _$RecipeIngredientFromJson(Map<String, dynamic> json) =>
     _RecipeIngredient(
       ingredientName: json['ingredient_name'] as String,
       ingredientAppId: json['ingredient_app_id'] as String,
-      displayQuantity: json['display_quantity'] as String,
+      displayQuantity: json['display_quantity'] as String?,
       order: (json['order'] as num).toInt(),
       displayUnitName: json['display_unit_name'] as String?,
       displayUnitGrams: (json['display_unit_grams'] as num?)?.toDouble(),
@@ -32,15 +32,15 @@ Map<String, dynamic> _$RecipeIngredientToJson(_RecipeIngredient instance) =>
 
 _RecipeDetail _$RecipeDetailFromJson(Map<String, dynamic> json) =>
     _RecipeDetail(
-      slug: json['slug'] as String,
-      name: json['name'] as String,
-      cuisine: json['cuisine'] as String,
-      mealType: json['meal_type'] as String,
-      prepTimeMin: (json['prep_time_min'] as num).toInt(),
-      cookTimeMin: (json['cook_time_min'] as num).toInt(),
-      servings: (json['servings'] as num).toInt(),
-      estimatedDifficulty: json['estimated_difficulty'] as String,
-      spiceLevel: json['spice_level'] as String,
+      slug: json['slug'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      cuisine: json['cuisine'] as String? ?? '',
+      mealType: json['meal_type'] as String? ?? '',
+      prepTimeMin: (json['prep_time_min'] as num?)?.toInt() ?? 0,
+      cookTimeMin: (json['cook_time_min'] as num?)?.toInt() ?? 0,
+      servings: (json['servings'] as num?)?.toInt() ?? 1,
+      estimatedDifficulty: json['estimated_difficulty'] as String? ?? '',
+      spiceLevel: json['spice_level'] as String? ?? '',
       nameAlt: json['name_alt'] as String?,
       imageUrl: json['image_url'] as String?,
       proteinSource: json['protein_source'] as String?,

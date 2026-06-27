@@ -8,9 +8,9 @@ part of 'week_meal_day.dart';
 
 _WeekMealDay _$WeekMealDayFromJson(Map<String, dynamic> json) => _WeekMealDay(
   id: (json['id'] as num).toInt(),
-  planDate: json['plan_date'] as String,
-  generatedBy: json['generated_by'] as String,
-  generatedAt: json['generated_at'] as String,
+  planDate: json['plan_date'] as String? ?? '',
+  generatedBy: json['generated_by'] as String? ?? '',
+  generatedAt: json['generated_at'] as String? ?? '',
   regenerationCount: (json['regeneration_count'] as Map<String, dynamic>?) ?? const {},
   breakfast: json['breakfast'] == null
       ? null

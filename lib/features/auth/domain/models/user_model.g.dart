@@ -7,11 +7,11 @@ part of 'user_model.dart';
 // **************************************************************************
 
 _User _$UserFromJson(Map<String, dynamic> json) => _User(
-  id: (json['id'] as num).toInt(),
-  email: json['email'] as String,
-  firebaseUid: json['firebase_uid'] as String,
-  displayName: json['display_name'] as String,
-  hasProfile: json['has_profile'] as bool,
+  id: (json['id'] as num?)?.toInt() ?? 0,
+  email: json['email'] as String? ?? '',
+  firebaseUid: json['firebase_uid'] as String? ?? '',
+  displayName: json['display_name'] as String? ?? '',
+  hasProfile: json['has_profile'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{

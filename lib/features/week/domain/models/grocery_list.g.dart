@@ -7,14 +7,14 @@ part of 'grocery_list.dart';
 // **************************************************************************
 
 _GroceryItem _$GroceryItemFromJson(Map<String, dynamic> json) => _GroceryItem(
-  ingredientAppId: json['ingredient_app_id'] as String,
-  ingredientName: json['ingredient_name'] as String,
-  totalGrams: (json['total_grams'] as num).toDouble(),
-  displayQuantity: json['display_quantity'] as String,
-  displayQuantityValue: (json['display_quantity_value'] as num).toDouble(),
-  displayUnit: json['display_unit'] as String,
-  recipeCount: (json['recipe_count'] as num).toInt(),
-  pantryStaple: json['pantry_staple'] as bool,
+  ingredientAppId: json['ingredient_app_id'] as String? ?? '',
+  ingredientName: json['ingredient_name'] as String? ?? '',
+  totalGrams: (json['total_grams'] as num?)?.toDouble() ?? 0.0,
+  displayQuantity: json['display_quantity'] as String? ?? '',
+  displayQuantityValue: (json['display_quantity_value'] as num?)?.toDouble() ?? 0.0,
+  displayUnit: json['display_unit'] as String? ?? '',
+  recipeCount: (json['recipe_count'] as num?)?.toInt() ?? 0,
+  pantryStaple: json['pantry_staple'] as bool? ?? false,
   estimatedCostInr: (json['estimated_cost_inr'] as num?)?.toDouble(),
   notes: json['notes'] as String? ?? '',
 );
@@ -35,9 +35,9 @@ Map<String, dynamic> _$GroceryItemToJson(_GroceryItem instance) =>
 
 _GroceryCategory _$GroceryCategoryFromJson(Map<String, dynamic> json) =>
     _GroceryCategory(
-      category: json['category'] as String,
-      categoryDisplay: json['category_display'] as String,
-      items: (json['items'] as List<dynamic>)
+      category: json['category'] as String? ?? '',
+      categoryDisplay: json['category_display'] as String? ?? '',
+      items: (json['items'] as List<dynamic>? ?? const [])
           .map((e) => GroceryItem.fromJson(e as Map<String, dynamic>))
           .toList(),
     );

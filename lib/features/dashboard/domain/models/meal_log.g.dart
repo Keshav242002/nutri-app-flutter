@@ -11,8 +11,8 @@ _MealLogRecipeRef _$MealLogRecipeRefFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       slug: json['slug'] as String,
-      cachedCaloriesPerServing: (json['cached_calories_per_serving'] as num)
-          .toInt(),
+      cachedCaloriesPerServing:
+          (json['cached_calories_per_serving'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$MealLogRecipeRefToJson(_MealLogRecipeRef instance) =>
