@@ -29,7 +29,11 @@ class _IngredientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qty = ingredient.displayQuantity;
+    final qty = ingredient.displayQuantity?.isNotEmpty == true
+        ? ingredient.displayQuantity!
+        : ingredient.quantityGrams != null
+            ? '${ingredient.quantityGrams}g'
+            : '';
     final unit = ingredient.displayUnitName ?? '';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -53,7 +57,7 @@ class _IngredientRow extends StatelessWidget {
             ),
           ),
           Text(
-            unit.isEmpty ? qty : '$qty $unit',
+            unit.isEmpty || qty.endsWith('g') ? qty : '$qty $unit',
             style: AppTypography.caption.copyWith(
               color: AppColors.textSecondary,
             ),

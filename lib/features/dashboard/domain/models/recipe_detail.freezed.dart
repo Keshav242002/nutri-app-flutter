@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecipeIngredient {
 
- String get ingredientName; String get ingredientAppId; String get displayQuantity; int get order; String? get displayUnitName; double? get displayUnitGrams; String? get quantityGrams; String? get notes;
+ String get ingredientName; String get ingredientAppId; String? get displayQuantity; int get order; String? get displayUnitName; double? get displayUnitGrams; String? get quantityGrams; String? get notes;
 /// Create a copy of RecipeIngredient
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $RecipeIngredientCopyWith<$Res>  {
   factory $RecipeIngredientCopyWith(RecipeIngredient value, $Res Function(RecipeIngredient) _then) = _$RecipeIngredientCopyWithImpl;
 @useResult
 $Res call({
- String ingredientName, String ingredientAppId, String displayQuantity, int order, String? displayUnitName, double? displayUnitGrams, String? quantityGrams, String? notes
+ String ingredientName, String ingredientAppId, String? displayQuantity, int order, String? displayUnitName, double? displayUnitGrams, String? quantityGrams, String? notes
 });
 
 
@@ -65,12 +65,12 @@ class _$RecipeIngredientCopyWithImpl<$Res>
 
 /// Create a copy of RecipeIngredient
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? ingredientName = null,Object? ingredientAppId = null,Object? displayQuantity = null,Object? order = null,Object? displayUnitName = freezed,Object? displayUnitGrams = freezed,Object? quantityGrams = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? ingredientName = null,Object? ingredientAppId = null,Object? displayQuantity = freezed,Object? order = null,Object? displayUnitName = freezed,Object? displayUnitGrams = freezed,Object? quantityGrams = freezed,Object? notes = freezed,}) {
   return _then(_self.copyWith(
 ingredientName: null == ingredientName ? _self.ingredientName : ingredientName // ignore: cast_nullable_to_non_nullable
 as String,ingredientAppId: null == ingredientAppId ? _self.ingredientAppId : ingredientAppId // ignore: cast_nullable_to_non_nullable
-as String,displayQuantity: null == displayQuantity ? _self.displayQuantity : displayQuantity // ignore: cast_nullable_to_non_nullable
-as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as String,displayQuantity: freezed == displayQuantity ? _self.displayQuantity : displayQuantity // ignore: cast_nullable_to_non_nullable
+as String?,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,displayUnitName: freezed == displayUnitName ? _self.displayUnitName : displayUnitName // ignore: cast_nullable_to_non_nullable
 as String?,displayUnitGrams: freezed == displayUnitGrams ? _self.displayUnitGrams : displayUnitGrams // ignore: cast_nullable_to_non_nullable
 as double?,quantityGrams: freezed == quantityGrams ? _self.quantityGrams : quantityGrams // ignore: cast_nullable_to_non_nullable
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String ingredientName,  String ingredientAppId,  String displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String ingredientName,  String ingredientAppId,  String? displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecipeIngredient() when $default != null:
 return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity,_that.order,_that.displayUnitName,_that.displayUnitGrams,_that.quantityGrams,_that.notes);case _:
@@ -181,7 +181,7 @@ return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String ingredientName,  String ingredientAppId,  String displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String ingredientName,  String ingredientAppId,  String? displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)  $default,) {final _that = this;
 switch (_that) {
 case _RecipeIngredient():
 return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity,_that.order,_that.displayUnitName,_that.displayUnitGrams,_that.quantityGrams,_that.notes);case _:
@@ -201,7 +201,7 @@ return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String ingredientName,  String ingredientAppId,  String displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String ingredientName,  String ingredientAppId,  String? displayQuantity,  int order,  String? displayUnitName,  double? displayUnitGrams,  String? quantityGrams,  String? notes)?  $default,) {final _that = this;
 switch (_that) {
 case _RecipeIngredient() when $default != null:
 return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity,_that.order,_that.displayUnitName,_that.displayUnitGrams,_that.quantityGrams,_that.notes);case _:
@@ -216,12 +216,12 @@ return $default(_that.ingredientName,_that.ingredientAppId,_that.displayQuantity
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _RecipeIngredient implements RecipeIngredient {
-  const _RecipeIngredient({required this.ingredientName, required this.ingredientAppId, required this.displayQuantity, required this.order, this.displayUnitName, this.displayUnitGrams, this.quantityGrams, this.notes});
+  const _RecipeIngredient({required this.ingredientName, required this.ingredientAppId, this.displayQuantity, required this.order, this.displayUnitName, this.displayUnitGrams, this.quantityGrams, this.notes});
   factory _RecipeIngredient.fromJson(Map<String, dynamic> json) => _$RecipeIngredientFromJson(json);
 
 @override final  String ingredientName;
 @override final  String ingredientAppId;
-@override final  String displayQuantity;
+@override final  String? displayQuantity;
 @override final  int order;
 @override final  String? displayUnitName;
 @override final  double? displayUnitGrams;
@@ -261,7 +261,7 @@ abstract mixin class _$RecipeIngredientCopyWith<$Res> implements $RecipeIngredie
   factory _$RecipeIngredientCopyWith(_RecipeIngredient value, $Res Function(_RecipeIngredient) _then) = __$RecipeIngredientCopyWithImpl;
 @override @useResult
 $Res call({
- String ingredientName, String ingredientAppId, String displayQuantity, int order, String? displayUnitName, double? displayUnitGrams, String? quantityGrams, String? notes
+ String ingredientName, String ingredientAppId, String? displayQuantity, int order, String? displayUnitName, double? displayUnitGrams, String? quantityGrams, String? notes
 });
 
 
@@ -278,12 +278,12 @@ class __$RecipeIngredientCopyWithImpl<$Res>
 
 /// Create a copy of RecipeIngredient
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? ingredientName = null,Object? ingredientAppId = null,Object? displayQuantity = null,Object? order = null,Object? displayUnitName = freezed,Object? displayUnitGrams = freezed,Object? quantityGrams = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? ingredientName = null,Object? ingredientAppId = null,Object? displayQuantity = freezed,Object? order = null,Object? displayUnitName = freezed,Object? displayUnitGrams = freezed,Object? quantityGrams = freezed,Object? notes = freezed,}) {
   return _then(_RecipeIngredient(
 ingredientName: null == ingredientName ? _self.ingredientName : ingredientName // ignore: cast_nullable_to_non_nullable
 as String,ingredientAppId: null == ingredientAppId ? _self.ingredientAppId : ingredientAppId // ignore: cast_nullable_to_non_nullable
-as String,displayQuantity: null == displayQuantity ? _self.displayQuantity : displayQuantity // ignore: cast_nullable_to_non_nullable
-as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as String,displayQuantity: freezed == displayQuantity ? _self.displayQuantity : displayQuantity // ignore: cast_nullable_to_non_nullable
+as String?,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,displayUnitName: freezed == displayUnitName ? _self.displayUnitName : displayUnitName // ignore: cast_nullable_to_non_nullable
 as String?,displayUnitGrams: freezed == displayUnitGrams ? _self.displayUnitGrams : displayUnitGrams // ignore: cast_nullable_to_non_nullable
 as double?,quantityGrams: freezed == quantityGrams ? _self.quantityGrams : quantityGrams // ignore: cast_nullable_to_non_nullable

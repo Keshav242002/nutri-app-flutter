@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ahara/core/config/env.dart';
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
 import 'package:ahara/core/theme/app_typography.dart';
@@ -192,7 +193,7 @@ class _RecipeMiniCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final url = recipe.imageUrl;
+    final url = Env.resolveMediaUrl(recipe.imageUrl);
     return Container(
       height: 120,
       decoration: BoxDecoration(
@@ -210,11 +211,10 @@ class _RecipeMiniCard extends StatelessWidget {
               placeholder: (_, __) => const ColoredBox(
                 color: AppColors.navyMid,
               ),
-              errorWidget: (_, __, ___) => const Icon(
-                Icons.image_not_supported_rounded,
-                color: AppColors.textOnDarkSecondary,
-              ),
-            ),
+              errorWidget: (_, __, ___) => _noImageBackground(),
+            )
+          else
+            _noImageBackground(),
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -254,6 +254,25 @@ class _RecipeMiniCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _noImageBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A2340), Color(0xFF0D1520)],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.restaurant_rounded,
+          color: Colors.white.withValues(alpha: 0.2),
+          size: 36,
+        ),
       ),
     );
   }

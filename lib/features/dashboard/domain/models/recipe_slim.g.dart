@@ -7,14 +7,14 @@ part of 'recipe_slim.dart';
 // **************************************************************************
 
 _RecipeSlim _$RecipeSlimFromJson(Map<String, dynamic> json) => _RecipeSlim(
-  id: (json['id'] as num).toInt(),
-  name: json['name'] as String,
-  slug: json['slug'] as String,
-  mealType: json['meal_type'] as String,
-  cuisine: json['cuisine'] as String,
-  prepTimeMin: (json['prep_time_min'] as num).toInt(),
-  cachedCaloriesPerServing: (json['cached_calories_per_serving'] as num)
-      .toInt(),
+  id: (json['id'] as num?)?.toInt() ?? 0,
+  name: json['name'] as String? ?? '',
+  slug: json['slug'] as String? ?? '',
+  mealType: json['meal_type'] as String? ?? '',
+  cuisine: json['cuisine'] as String? ?? '',
+  prepTimeMin: (json['prep_time_min'] as num?)?.toInt() ?? 0,
+  cachedCaloriesPerServing:
+      (json['cached_calories_per_serving'] as num?)?.toInt() ?? 0,
   imageUrl: json['image_url'] as String?,
   proteinSource: json['protein_source'] as String?,
 );

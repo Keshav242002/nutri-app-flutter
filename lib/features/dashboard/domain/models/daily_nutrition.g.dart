@@ -8,13 +8,15 @@ part of 'daily_nutrition.dart';
 
 _DailyNutrition _$DailyNutritionFromJson(Map<String, dynamic> json) =>
     _DailyNutrition(
-      date: json['date'] as String,
-      totals: NutritionSummary.fromJson(json['totals'] as Map<String, dynamic>),
-      targets: NutritionSummary.fromJson(
-        json['targets'] as Map<String, dynamic>,
-      ),
-      mealsEaten: (json['meals_eaten'] as num).toInt(),
-      mealsSkipped: (json['meals_skipped'] as num).toInt(),
+      date: json['date'] as String? ?? '',
+      totals: json['totals'] == null
+          ? const NutritionSummary()
+          : NutritionSummary.fromJson(json['totals'] as Map<String, dynamic>),
+      targets: json['targets'] == null
+          ? const NutritionSummary()
+          : NutritionSummary.fromJson(json['targets'] as Map<String, dynamic>),
+      mealsEaten: (json['meals_eaten'] as num?)?.toInt() ?? 0,
+      mealsSkipped: (json['meals_skipped'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$DailyNutritionToJson(_DailyNutrition instance) =>

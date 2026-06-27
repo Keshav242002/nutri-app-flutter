@@ -13,8 +13,8 @@ abstract class RecipeIngredient with _$RecipeIngredient {
   const factory RecipeIngredient({
     required String ingredientName,
     required String ingredientAppId,
-    required String displayQuantity,
     required int order,
+    String? displayQuantity,
     String? displayUnitName,
     double? displayUnitGrams,
     String? quantityGrams,

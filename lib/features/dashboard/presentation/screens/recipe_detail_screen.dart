@@ -1,6 +1,7 @@
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
+import 'package:ahara/core/theme/app_typography.dart';
 import 'package:ahara/core/widgets/error_state.dart';
 import 'package:ahara/core/widgets/loading_state.dart';
 import 'package:ahara/features/dashboard/domain/models/recipe_detail.dart';
@@ -61,12 +62,31 @@ class _RecipeBody extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.screenHorizontal,
-            AppSpacing.lg,
+            AppSpacing.md,
             AppSpacing.screenHorizontal,
             AppSpacing.xxl,
           ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
+              // Recipe name lives here — always readable on cream, never
+              // fighting with a photo background.
+              Text(
+                recipe.name,
+                style: AppTypography.displayMedium.copyWith(
+                  color: AppColors.navyDeep,
+                ),
+              ),
+              if (recipe.nameAlt != null && recipe.nameAlt!.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  recipe.nameAlt!,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
               RecipeMetaRow(recipe: recipe),
               const SizedBox(height: AppSpacing.lg),
               if (recipe.cachedNutritionSummary != null) ...[

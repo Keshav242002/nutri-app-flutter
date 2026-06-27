@@ -1,3 +1,4 @@
+import 'package:ahara/core/config/env.dart';
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_spacing.dart';
 import 'package:ahara/core/theme/app_typography.dart';
@@ -139,11 +140,11 @@ class _CardImage extends StatelessWidget {
   final AnimationController nowPulse;
 
   String? get _imageUrl => cardState.when(
-        planned: (recipe, _) => recipe.imageUrl,
-        eaten: (recipe, _, __) => recipe.imageUrl,
-        loggedSubstituted: (recipe, _) => recipe.imageUrl,
+        planned: (recipe, _) => Env.resolveMediaUrl(recipe.imageUrl),
+        eaten: (recipe, _, __) => Env.resolveMediaUrl(recipe.imageUrl),
+        loggedSubstituted: (recipe, _) => Env.resolveMediaUrl(recipe.imageUrl),
         loggedCustom: (__, _, ___) => null,
-        skipped: (recipe, _) => recipe.imageUrl,
+        skipped: (recipe, _) => Env.resolveMediaUrl(recipe.imageUrl),
       );
 
   String get _slotLabel => cardState.when(
@@ -179,23 +180,9 @@ class _CardImage extends StatelessWidget {
                     placeholder: (_, __) => const ColoredBox(
                       color: AppColors.navyDeep,
                     ),
-                    errorWidget: (_, __, ___) => const ColoredBox(
-                      color: AppColors.navyDeep,
-                      child: Icon(
-                        Icons.image_not_supported_rounded,
-                        color: AppColors.textOnDarkSecondary,
-                        size: 40,
-                      ),
-                    ),
+                    errorWidget: (_, __, ___) => _FoodPlaceholder(),
                   )
-                : const ColoredBox(
-                    color: AppColors.navyDeep,
-                    child: Icon(
-                      Icons.image_not_supported_rounded,
-                      color: AppColors.textOnDarkSecondary,
-                      size: 40,
-                    ),
-                  ),
+                : _FoodPlaceholder(),
           ),
           // Gradient overlay
           Positioned.fill(
@@ -243,6 +230,42 @@ class _CardImage extends StatelessWidget {
     if (isEaten) return const _EatenBadge();
     if (isCurrentSlot) return _NowBadge(pulse: nowPulse);
     return const SizedBox.shrink();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Food placeholder — shown when a recipe has no image
+// ---------------------------------------------------------------------------
+
+class _FoodPlaceholder extends StatelessWidget {
+  const _FoodPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1A2340),
+            Color(0xFF0D1520),
+          ],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.restaurant_rounded,
+            color: Colors.white.withValues(alpha: 0.2),
+            size: 48,
+          ),
+        ],
+      ),
+    );
   }
 }
 
