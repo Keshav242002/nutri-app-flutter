@@ -1,3 +1,4 @@
+import 'package:ahara/core/config/env.dart';
 import 'package:ahara/core/theme/app_colors.dart';
 import 'package:ahara/core/theme/app_radius.dart';
 import 'package:ahara/core/theme/app_shadows.dart';
@@ -96,30 +97,33 @@ class MealCard extends StatelessWidget {
 
   Widget _image() {
     if (imageUrl == null) {
-      return Container(
-        height: 120,
-        color: AppColors.navyDeep,
-        child: const Center(
-          child: Icon(
-            Icons.restaurant_menu_rounded,
-            color: AppColors.textOnDarkSecondary,
-            size: 32,
-          ),
-        ),
-      );
+      return _buildPlaceholder();
     }
     return CachedNetworkImage(
-      imageUrl: imageUrl!,
+      imageUrl: Env.resolveMediaUrl(imageUrl)!,
       height: 120,
       width: double.infinity,
       fit: BoxFit.cover,
       placeholder: (_, __) => Container(height: 120, color: AppColors.navyDeep),
-      errorWidget: (_, __, ___) => Container(
-        height: 120,
-        color: AppColors.creamBorder,
-        child: const Icon(
-          Icons.broken_image_outlined,
-          color: AppColors.textHint,
+      errorWidget: (_, __, ___) => _buildPlaceholder(),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      height: 120,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A2340), Color(0xFF0D1520)],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          Icons.restaurant_rounded,
+          color: Colors.white.withValues(alpha: 0.2),
+          size: 32,
         ),
       ),
     );
