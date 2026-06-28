@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
+import 'package:ahara/core/cache/cache_service.dart';
 import 'package:ahara/core/network/api_exceptions.dart';
 import 'package:ahara/core/notifications/push_messaging_service.dart';
 import 'package:ahara/features/auth/data/auth_repository.dart';
@@ -80,7 +81,12 @@ class AuthController extends _$AuthController {
     // otherwise leak across accounts until an app restart.
     ref
       ..invalidate(dashboardControllerProvider)
-      ..invalidate(unreadCountControllerProvider);
+      ..invalidate(unreadCountControllerProvider)
+      ..invalidate(pushSettingsControllerProvider);
+
+    // Wipe the Hive offline cache — it is keyed by endpoint path, not by user,
+    // so without this the next account briefly sees the previous user's data.
+    await ref.read(cacheServiceProvider).clearAll();
   }
 
   /// Immediately marks the session as authenticated with [user].

@@ -117,8 +117,16 @@ class AuthRepository {
             'password': ['Password must be at least 6 characters.'],
           },
         ),
-        'wrong-password' || 'invalid-credential' || 'user-not-found' =>
+        'wrong-password' || 'invalid-credential' =>
           const UnauthorizedException(message: 'Incorrect email or password.'),
+        'user-not-found' => const UnauthorizedException(
+          message:
+              'No account found with that email. Tap "Create one" to sign up.',
+        ),
+        'operation-not-allowed' => const UnauthorizedException(
+          message:
+              'Email/password sign-in is not enabled. Please contact support.',
+        ),
         'user-disabled' => const UnauthorizedException(
           message: 'This account has been disabled.',
         ),
