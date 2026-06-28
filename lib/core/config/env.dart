@@ -8,10 +8,8 @@ class Env {
 
   /// Base URL for all API calls.
   ///
-  /// Currently the local dev backend, addressed by the host machine's LAN IP
-  /// so it is reachable from emulators, simulators, and physical devices on
-  /// the same network. Swap this for the deployed HTTPS URL when shipping.
-  static const String apiBaseUrl = 'http://localhost:8000/api/v1';
+  /// Production GCP backend
+  static const String apiBaseUrl = 'http://35.202.251.222/api/v1';
 
   /// Resolves a media URL returned by the backend so it is reachable from the
   /// current runtime environment.

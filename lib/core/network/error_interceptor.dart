@@ -109,7 +109,11 @@ class ErrorInterceptor extends Interceptor {
 
   Map<String, List<String>> _parseFieldErrors(dynamic details) {
     if (details is! Map<String, dynamic>) return const {};
-    return details.map(
+    // The Django backend wraps DRF field errors as: {"details": {"fields": {...}}}
+    // so we unwrap the nested "fields" key if present.
+    final fields = details['fields'] ?? details;
+    if (fields is! Map<String, dynamic>) return const {};
+    return fields.map(
       (key, value) => MapEntry(
         key,
         value is List ? value.cast<String>() : <String>[value.toString()],

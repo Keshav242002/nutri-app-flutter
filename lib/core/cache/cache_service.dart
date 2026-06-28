@@ -55,6 +55,19 @@ class CacheService {
       return null;
     }
   }
+
+  /// Wipes all cached entries.
+  ///
+  /// Called on sign-out so the next user (or re-login of the same user) does
+  /// not see stale data from the previous session.
+  Future<void> clearAll() async {
+    try {
+      await _box.clear();
+      dev.log('cache cleared', name: 'CACHE');
+    } on Object catch (e) {
+      dev.log('cache clearAll failed: $e', name: 'CACHE');
+    }
+  }
 }
 
 /// Provides the app-wide [CacheService].

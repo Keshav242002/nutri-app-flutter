@@ -131,8 +131,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return state.when(
       chooseMethod: _buildChooseMethod,
       emailPasswordEntry: _buildEmailPasswordEntry,
-      emailPasswordSubmitting: (String email) =>
-          _buildEmailPasswordEntry(email, '', false, null, loading: true),
+      emailPasswordSubmitting: (String email) {
+        // Read the previous state's isSignUpMode before it was replaced with
+        // emailPasswordSubmitting — it was already captured in the controller.
+        // Since submitting hides the toggle, default false is fine visually,
+        // but the title should match what the user was doing.
+        return _buildEmailPasswordEntry(email, '', false, null, loading: true);
+      },
       googleSigningIn: _buildGoogleLoading,
       success: _buildSuccessLoading,
       // Error is surfaced via toast; render choose-method while toast shows.

@@ -89,12 +89,22 @@ class LoginController extends _$LoginController {
         ref.read(authControllerProvider.notifier).setAuthenticated(user);
         return LoginFormState.success(user);
       },
-      failure: (AppException e) => LoginFormState.emailPasswordEntry(
-        email: email,
-        password: password,
-        isSignUpMode: isSignUp,
-        errorMessage: e.message,
-      ),
+      failure: (AppException e) {
+        // ValidationException carries the real errors in fieldErrors —
+        // e.message is just the generic "Please fix the errors below." string.
+        // Flatten all field errors into a single readable message for the toast.
+        final errorMessage = switch (e) {
+          ValidationException(:final fieldErrors) when fieldErrors.isNotEmpty =>
+            fieldErrors.values.expand((msgs) => msgs).join(' '),
+          _ => e.message,
+        };
+        return LoginFormState.emailPasswordEntry(
+          email: email,
+          password: password,
+          isSignUpMode: isSignUp,
+          errorMessage: errorMessage,
+        );
+      },
     );
   }
 
