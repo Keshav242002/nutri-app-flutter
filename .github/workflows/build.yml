@@ -28,11 +28,17 @@ jobs:
           channel: stable
           cache: true
 
-      # ── 3. Dependencies ──────────────────────────────────────────────────────
+      # ── 3. Restore debug keystore (keeps SHA consistent across CI runs) ────────
+      - name: Restore debug keystore
+        run: |
+          mkdir -p ~/.android
+          echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 --decode > ~/.android/debug.keystore
+
+      # ── 4. Dependencies ──────────────────────────────────────────────────────
       - name: Install Flutter dependencies
         run: flutter pub get
 
-      # ── 4. Build ─────────────────────────────────────────────────────────────
+      # ── 5. Build ─────────────────────────────────────────────────────────────
       - name: Build release APK
         run: |
           flutter build apk --release \
@@ -47,10 +53,15 @@ jobs:
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: "Build from commit ${{ github.sha }}"
 
-      # ── 6. Keep APK as artifact (optional — useful for debugging) ─────────────
-      - name: Save APK artifact
-        uses: actions/upload-artifact@v4
+      # ── 6. GitHub Release with APK attached ──────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: release-apk-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
+          tag_name: build-${{ github.run_number }}
+          name: "Build #${{ github.run_number }}"
+          body: |
+            Automated release from commit ${{ github.sha }}
+            ${{ github.event.head_commit.message }}
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
