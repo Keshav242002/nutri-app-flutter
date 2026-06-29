@@ -8,8 +8,12 @@ class Env {
 
   /// Base URL for all API calls.
   ///
-  /// Production GCP backend
-  static const String apiBaseUrl = 'http://35.202.251.222/api/v1';
+  /// Injected at build time via --dart-define=API_BASE_URL=...
+  /// Falls back to the local dev server if not set.
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://192.168.0.249:8000/api/v1',
+  );
 
   /// Resolves a media URL returned by the backend so it is reachable from the
   /// current runtime environment.

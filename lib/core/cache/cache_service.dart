@@ -64,8 +64,9 @@ class CacheService {
     try {
       await _box.clear();
       dev.log('cache cleared', name: 'CACHE');
-    } on Object catch (e) {
-      dev.log('cache clearAll failed: $e', name: 'CACHE');
+    } on Object catch (e, st) {
+      dev.log('cache clearAll failed: $e', name: 'CACHE', error: e, stackTrace: st);
+      rethrow;
     }
   }
 }
