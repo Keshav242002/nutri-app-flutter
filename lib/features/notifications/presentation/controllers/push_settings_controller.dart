@@ -93,13 +93,14 @@ class PushSettingsController extends _$PushSettingsController {
   ///
   /// On the **first** launch it auto-prompts for notification permission once:
   /// if granted, the flag is saved `true` and the token is registered; if
-  /// denied, the flag stays `false`. On later launches it simply registers the
-  /// token when the user is already opted in (respecting any manual toggle).
+  /// denied, the flag stays `false`. On later launches it unconditionally
+  /// re-registers the current FCM token so account switches always bind the
+  /// physical device token to the new user (the backend uses update_or_create).
   Future<void> initOnLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     final prompted = prefs.getBool(_kPrompted) ?? false;
     if (prompted) {
-      await registerIfEnabled();
+      await _registerTokenNow();
       return;
     }
     await prefs.setBool(_kPrompted, true);
@@ -130,6 +131,23 @@ class PushSettingsController extends _$PushSettingsController {
       case Failure<void>():
         await _persist(enabled: false);
         state = const AsyncData(false);
+    }
+  }
+
+  Future<void> _registerTokenNow() async {
+    final service = ref.read(pushMessagingServiceProvider);
+    await service.init();
+    final token = await service.getToken();
+    if (token == null) return;
+    final result = await ref
+        .read(notificationsRepositoryProvider)
+        .registerDevice(fcmToken: token, platform: service.platform);
+    switch (result) {
+      case Success<void>():
+        await _persist(enabled: true);
+        state = const AsyncData(true);
+      case Failure<void>():
+        break;
     }
   }
 
