@@ -73,6 +73,18 @@ class AuthRepository {
     }
   }
 
+  /// Sends a password reset email via Firebase.
+  Future<Result<void>> sendPasswordResetEmail(String email) async {
+    try {
+      await _ds.sendPasswordResetEmail(email);
+      return const Success(null);
+    } on fb.FirebaseAuthException catch (e) {
+      return Failure(_mapFirebaseError(e));
+    } on Object catch (e) {
+      return Failure(UnknownException(message: e.toString()));
+    }
+  }
+
   /// Signs out from Firebase and clears session.
   Future<Result<void>> signOut() async {
     try {

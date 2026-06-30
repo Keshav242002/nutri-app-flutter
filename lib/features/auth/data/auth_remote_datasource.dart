@@ -18,7 +18,11 @@ class AuthRemoteDataSource {
     GoogleSignIn? googleSignIn,
   }) : _dio = dio,
        _auth = firebaseAuth ?? fb.FirebaseAuth.instance,
-       _googleSignIn = googleSignIn ?? GoogleSignIn();
+       _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              serverClientId:
+                  '1096443926227-0tn8m02cceue8mtsq70mvad34icn8isi.apps.googleusercontent.com',
+            );
 
   final Dio _dio;
   final fb.FirebaseAuth _auth;
@@ -83,6 +87,10 @@ class AuthRemoteDataSource {
     String email,
     String password,
   ) => _auth.createUserWithEmailAndPassword(email: email, password: password);
+
+  /// Sends a Firebase password reset email.
+  Future<void> sendPasswordResetEmail(String email) =>
+      _auth.sendPasswordResetEmail(email: email);
 
   /// Signs out from Firebase and Google.
   Future<void> signOut() async {

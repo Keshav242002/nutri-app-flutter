@@ -69,12 +69,16 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final imageHeight = size.height * 0.58;
-    final sheetHeight = size.height * 0.42 + 16; // +16 overlap
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
+    final availableHeight = size.height - statusBarHeight;
+    final imageHeight = availableHeight * 0.58;
+    final sheetHeight = availableHeight * 0.42 + 16; // +16 overlap
 
     return Scaffold(
       backgroundColor: AppColors.navyDeep,
-      body: Stack(
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
         children: [
           // Full-bleed filler so the Stack fills the screen; otherwise it
           // collapses to the image height and the sheet floats up the screen.
@@ -141,7 +145,8 @@ class _OnboardingSlidesScreenState extends State<OnboardingSlidesScreen> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   /// Carousel push for the image panel.

@@ -30,4 +30,15 @@ sealed class LoginFormState with _$LoginFormState {
 
   /// Terminal error — shown inline below the active action.
   const factory LoginFormState.error(String message) = _Error;
+
+  /// User is entering their email for password reset.
+  const factory LoginFormState.forgotPasswordEntry({
+    required String email,
+    String? errorMessage,
+  }) = _ForgotPasswordEntry;
+
+  /// Reset email sent successfully.
+  const factory LoginFormState.forgotPasswordSent({
+    required String email,
+  }) = _ForgotPasswordSent;
 }

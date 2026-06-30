@@ -84,7 +84,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Future<void> _onAnimationDone(AnimationStatus status) async {
     if (status != AnimationStatus.completed) return;
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
 
     if (!mounted) return;
     final result = await ref.read(splashControllerProvider.future);
