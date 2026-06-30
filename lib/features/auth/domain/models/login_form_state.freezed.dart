@@ -55,7 +55,7 @@ extension LoginFormStatePatterns on LoginFormState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ChooseMethod value)?  chooseMethod,TResult Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult Function( _GoogleSigningIn value)?  googleSigningIn,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ChooseMethod value)?  chooseMethod,TResult Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult Function( _GoogleSigningIn value)?  googleSigningIn,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,TResult Function( _ForgotPasswordEntry value)?  forgotPasswordEntry,TResult Function( _ForgotPasswordSent value)?  forgotPasswordSent,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
@@ -64,7 +64,9 @@ return emailPasswordEntry(_that);case _EmailPasswordSubmitting() when emailPassw
 return emailPasswordSubmitting(_that);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
-return error(_that);case _:
+return error(_that);case _ForgotPasswordEntry() when forgotPasswordEntry != null:
+return forgotPasswordEntry(_that);case _ForgotPasswordSent() when forgotPasswordSent != null:
+return forgotPasswordSent(_that);case _:
   return orElse();
 
 }
@@ -82,7 +84,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ChooseMethod value)  chooseMethod,required TResult Function( _EmailPasswordEntry value)  emailPasswordEntry,required TResult Function( _EmailPasswordSubmitting value)  emailPasswordSubmitting,required TResult Function( _GoogleSigningIn value)  googleSigningIn,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ChooseMethod value)  chooseMethod,required TResult Function( _EmailPasswordEntry value)  emailPasswordEntry,required TResult Function( _EmailPasswordSubmitting value)  emailPasswordSubmitting,required TResult Function( _GoogleSigningIn value)  googleSigningIn,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,required TResult Function( _ForgotPasswordEntry value)  forgotPasswordEntry,required TResult Function( _ForgotPasswordSent value)  forgotPasswordSent,}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod():
@@ -91,7 +93,9 @@ return emailPasswordEntry(_that);case _EmailPasswordSubmitting():
 return emailPasswordSubmitting(_that);case _GoogleSigningIn():
 return googleSigningIn(_that);case _Success():
 return success(_that);case _Error():
-return error(_that);}
+return error(_that);case _ForgotPasswordEntry():
+return forgotPasswordEntry(_that);case _ForgotPasswordSent():
+return forgotPasswordSent(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -105,7 +109,7 @@ return error(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ChooseMethod value)?  chooseMethod,TResult? Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult? Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult? Function( _GoogleSigningIn value)?  googleSigningIn,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ChooseMethod value)?  chooseMethod,TResult? Function( _EmailPasswordEntry value)?  emailPasswordEntry,TResult? Function( _EmailPasswordSubmitting value)?  emailPasswordSubmitting,TResult? Function( _GoogleSigningIn value)?  googleSigningIn,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,TResult? Function( _ForgotPasswordEntry value)?  forgotPasswordEntry,TResult? Function( _ForgotPasswordSent value)?  forgotPasswordSent,}){
 final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
@@ -114,7 +118,9 @@ return emailPasswordEntry(_that);case _EmailPasswordSubmitting() when emailPassw
 return emailPasswordSubmitting(_that);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
-return error(_that);case _:
+return error(_that);case _ForgotPasswordEntry() when forgotPasswordEntry != null:
+return forgotPasswordEntry(_that);case _ForgotPasswordSent() when forgotPasswordSent != null:
+return forgotPasswordSent(_that);case _:
   return null;
 
 }
@@ -131,7 +137,7 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  chooseMethod,TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult Function( String email)?  emailPasswordSubmitting,TResult Function()?  googleSigningIn,TResult Function( User user)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  chooseMethod,TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult Function( String email)?  emailPasswordSubmitting,TResult Function()?  googleSigningIn,TResult Function( User user)?  success,TResult Function( String message)?  error,TResult Function( String email,  String? errorMessage)?  forgotPasswordEntry,TResult Function( String email)?  forgotPasswordSent,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
 return chooseMethod();case _EmailPasswordEntry() when emailPasswordEntry != null:
@@ -139,7 +145,9 @@ return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.er
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn();case _Success() when success != null:
 return success(_that.user);case _Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case _ForgotPasswordEntry() when forgotPasswordEntry != null:
+return forgotPasswordEntry(_that.email,_that.errorMessage);case _ForgotPasswordSent() when forgotPasswordSent != null:
+return forgotPasswordSent(_that.email);case _:
   return orElse();
 
 }
@@ -157,7 +165,7 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  chooseMethod,required TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)  emailPasswordEntry,required TResult Function( String email)  emailPasswordSubmitting,required TResult Function()  googleSigningIn,required TResult Function( User user)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  chooseMethod,required TResult Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)  emailPasswordEntry,required TResult Function( String email)  emailPasswordSubmitting,required TResult Function()  googleSigningIn,required TResult Function( User user)  success,required TResult Function( String message)  error,required TResult Function( String email,  String? errorMessage)  forgotPasswordEntry,required TResult Function( String email)  forgotPasswordSent,}) {final _that = this;
 switch (_that) {
 case _ChooseMethod():
 return chooseMethod();case _EmailPasswordEntry():
@@ -165,7 +173,9 @@ return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.er
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn():
 return googleSigningIn();case _Success():
 return success(_that.user);case _Error():
-return error(_that.message);}
+return error(_that.message);case _ForgotPasswordEntry():
+return forgotPasswordEntry(_that.email,_that.errorMessage);case _ForgotPasswordSent():
+return forgotPasswordSent(_that.email);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -179,7 +189,7 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  chooseMethod,TResult? Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult? Function( String email)?  emailPasswordSubmitting,TResult? Function()?  googleSigningIn,TResult? Function( User user)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  chooseMethod,TResult? Function( String email,  String password,  bool isSignUpMode,  String? errorMessage)?  emailPasswordEntry,TResult? Function( String email)?  emailPasswordSubmitting,TResult? Function()?  googleSigningIn,TResult? Function( User user)?  success,TResult? Function( String message)?  error,TResult? Function( String email,  String? errorMessage)?  forgotPasswordEntry,TResult? Function( String email)?  forgotPasswordSent,}) {final _that = this;
 switch (_that) {
 case _ChooseMethod() when chooseMethod != null:
 return chooseMethod();case _EmailPasswordEntry() when emailPasswordEntry != null:
@@ -187,7 +197,9 @@ return emailPasswordEntry(_that.email,_that.password,_that.isSignUpMode,_that.er
 return emailPasswordSubmitting(_that.email);case _GoogleSigningIn() when googleSigningIn != null:
 return googleSigningIn();case _Success() when success != null:
 return success(_that.user);case _Error() when error != null:
-return error(_that.message);case _:
+return error(_that.message);case _ForgotPasswordEntry() when forgotPasswordEntry != null:
+return forgotPasswordEntry(_that.email,_that.errorMessage);case _ForgotPasswordSent() when forgotPasswordSent != null:
+return forgotPasswordSent(_that.email);case _:
   return null;
 
 }
@@ -531,6 +543,140 @@ class __$ErrorCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(
 null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _ForgotPasswordEntry implements LoginFormState {
+  const _ForgotPasswordEntry({required this.email, this.errorMessage});
+
+
+ final  String email;
+ final  String? errorMessage;
+
+/// Create a copy of LoginFormState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ForgotPasswordEntryCopyWith<_ForgotPasswordEntry> get copyWith => __$ForgotPasswordEntryCopyWithImpl<_ForgotPasswordEntry>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ForgotPasswordEntry&&(identical(other.email, email) || other.email == email)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,email,errorMessage);
+
+@override
+String toString() {
+  return 'LoginFormState.forgotPasswordEntry(email: $email, errorMessage: $errorMessage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ForgotPasswordEntryCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
+  factory _$ForgotPasswordEntryCopyWith(_ForgotPasswordEntry value, $Res Function(_ForgotPasswordEntry) _then) = __$ForgotPasswordEntryCopyWithImpl;
+@useResult
+$Res call({
+ String email, String? errorMessage
+});
+
+
+
+
+}
+/// @nodoc
+class __$ForgotPasswordEntryCopyWithImpl<$Res>
+    implements _$ForgotPasswordEntryCopyWith<$Res> {
+  __$ForgotPasswordEntryCopyWithImpl(this._self, this._then);
+
+  final _ForgotPasswordEntry _self;
+  final $Res Function(_ForgotPasswordEntry) _then;
+
+/// Create a copy of LoginFormState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? email = null,Object? errorMessage = freezed,}) {
+  return _then(_ForgotPasswordEntry(
+email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _ForgotPasswordSent implements LoginFormState {
+  const _ForgotPasswordSent({required this.email});
+
+
+ final  String email;
+
+/// Create a copy of LoginFormState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ForgotPasswordSentCopyWith<_ForgotPasswordSent> get copyWith => __$ForgotPasswordSentCopyWithImpl<_ForgotPasswordSent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ForgotPasswordSent&&(identical(other.email, email) || other.email == email));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,email);
+
+@override
+String toString() {
+  return 'LoginFormState.forgotPasswordSent(email: $email)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ForgotPasswordSentCopyWith<$Res> implements $LoginFormStateCopyWith<$Res> {
+  factory _$ForgotPasswordSentCopyWith(_ForgotPasswordSent value, $Res Function(_ForgotPasswordSent) _then) = __$ForgotPasswordSentCopyWithImpl;
+@useResult
+$Res call({
+ String email
+});
+
+
+
+
+}
+/// @nodoc
+class __$ForgotPasswordSentCopyWithImpl<$Res>
+    implements _$ForgotPasswordSentCopyWith<$Res> {
+  __$ForgotPasswordSentCopyWithImpl(this._self, this._then);
+
+  final _ForgotPasswordSent _self;
+  final $Res Function(_ForgotPasswordSent) _then;
+
+/// Create a copy of LoginFormState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? email = null,}) {
+  return _then(_ForgotPasswordSent(
+email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

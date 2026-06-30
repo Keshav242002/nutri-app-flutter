@@ -22,6 +22,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.enabled = true,
+    this.focusNode,
   });
 
   /// Text editing controller.
@@ -63,10 +64,14 @@ class AppTextField extends StatelessWidget {
   /// Whether the field is interactive.
   final bool enabled;
 
+  /// Optional focus node for manual focus management.
+  final FocusNode? focusNode;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       onChanged: onChanged,

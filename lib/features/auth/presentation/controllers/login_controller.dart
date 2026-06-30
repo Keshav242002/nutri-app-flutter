@@ -108,6 +108,41 @@ class LoginController extends _$LoginController {
     );
   }
 
+  /// Transitions to [LoginFormState.forgotPasswordEntry], pre-filling email.
+  void selectForgotPassword() {
+    final currentEmail = state.maybeWhen(
+      emailPasswordEntry: (email, _, __, ___) => email,
+      orElse: () => '',
+    );
+    state = LoginFormState.forgotPasswordEntry(email: currentEmail);
+  }
+
+  /// Updates the email field within [LoginFormState.forgotPasswordEntry].
+  void updateForgotEmail(String email) {
+    state.maybeWhen(
+      forgotPasswordEntry: (_, errorMessage) {
+        state = LoginFormState.forgotPasswordEntry(email: email);
+      },
+      orElse: () {},
+    );
+  }
+
+  /// Submits the password reset request.
+  Future<void> submitForgotPassword(String email) async {
+    final result = await _repo.sendPasswordResetEmail(email);
+    result.when(
+      success: (_) {
+        state = LoginFormState.forgotPasswordSent(email: email);
+      },
+      failure: (AppException e) {
+        state = LoginFormState.forgotPasswordEntry(
+          email: email,
+          errorMessage: e.message,
+        );
+      },
+    );
+  }
+
   /// Returns to [LoginFormState.chooseMethod].
   void goBack() => state = const LoginFormState.chooseMethod();
 
