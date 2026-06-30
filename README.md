@@ -8,6 +8,7 @@
 [![Dart](https://img.shields.io/badge/Dart-3.10+-0175C2?logo=dart)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20FCM%20%7C%20Analytics%20%7C%20Crashlytics-FFCA28?logo=firebase)](https://firebase.google.com)
 [![Riverpod](https://img.shields.io/badge/Riverpod-3.x-blueviolet)](https://riverpod.dev)
+[![Backend](https://img.shields.io/badge/Backend-Django%20%7C%20DRF-092E20?logo=django)](https://github.com/Keshav242002/nutri-app-backend)
 
 </div>
 
@@ -48,6 +49,13 @@ Ahara bridges that gap by:
 - Providing an **AI chat assistant** for nutrition questions, with the ability to navigate directly to a recommended recipe.
 - Sending **push notifications** for meal reminders and plan updates.
 - Working **offline** by showing the last-known plan from a local Hive cache.
+
+### Related Repositories
+
+| Repo | Description |
+|---|---|
+| **This repo** | Flutter mobile client (Android + iOS) |
+| [**nutri-app-backend**](https://github.com/Keshav242002/nutri-app-backend) | Django + DRF backend — meal plan engine, Gemini chat, user profiles, nutrition math |
 
 ---
 
